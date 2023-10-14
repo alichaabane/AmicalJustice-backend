@@ -1,5 +1,6 @@
 package com.assocation.justice.dto;
 
+import com.assocation.justice.util.enumeration.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +15,6 @@ public class UserDTO {
         private String lastName;
         private String username;
         private String password;
-        private String confirmed;
+        private Role role;
+        private boolean confirmed;
 }

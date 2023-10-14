@@ -4,6 +4,7 @@ import com.assocation.justice.dto.JwtAuthenticationResponse;
 import com.assocation.justice.dto.SignUpRequest;
 import com.assocation.justice.dto.SigninRequest;
 import com.assocation.justice.security.AuthenticationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +24,11 @@ public class AuthenticationResource {
 
     @PostMapping("/signin")
     public ResponseEntity<JwtAuthenticationResponse> signin(@RequestBody SigninRequest request) {
-        return ResponseEntity.ok(authenticationService.signin(request));
+        JwtAuthenticationResponse jwtAuthenticationResponse = authenticationService.signin(request);
+        if(jwtAuthenticationResponse != null) {
+            return ResponseEntity.ok(jwtAuthenticationResponse);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }
