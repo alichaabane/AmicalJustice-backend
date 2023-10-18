@@ -1,5 +1,6 @@
 package com.assocation.justice.dto;
 
+import com.assocation.justice.util.enumeration.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +15,6 @@ public class SignUpRequest {
     private String lastName;
     private String username;
     private String password;
+    private boolean confirmed;
+    private Role role;
 }

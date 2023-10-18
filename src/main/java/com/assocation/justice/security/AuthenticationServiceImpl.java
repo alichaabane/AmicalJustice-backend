@@ -13,6 +13,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -25,7 +29,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public JwtAuthenticationResponse signup(SignUpRequest request) {
         var user = User.builder().firstName(request.getFirstName()).lastName(request.getLastName())
                 .username(request.getUsername()).password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.ADMIN).build();
+                .role(request.getRole() != null ? request.getRole() : Role.ADMIN).build();
         userRepository.save(user);
         var jwt = jwtService.generateToken(user);
         var userDTO = this.mapUserToUserDto(user);
@@ -48,7 +52,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return null;
         }
     }
-
+    @Override
+    public List<UserDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream().map(this::mapUserToUserDto).collect(Collectors.toList());
+    }
+    // Rest of your existing methods
 
     public UserDTO mapUserToUserDto(User user) {
         UserDTO userDTO = new UserDTO();
