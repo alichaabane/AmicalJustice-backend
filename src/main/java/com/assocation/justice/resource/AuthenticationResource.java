@@ -1,9 +1,6 @@
 package com.assocation.justice.resource;
 
-import com.assocation.justice.dto.JwtAuthenticationResponse;
-import com.assocation.justice.dto.SignUpRequest;
-import com.assocation.justice.dto.SigninRequest;
-import com.assocation.justice.dto.UserDTO;
+import com.assocation.justice.dto.*;
 import com.assocation.justice.security.AuthenticationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +33,15 @@ public class AuthenticationResource {
         }
     }
 
+    @PutMapping("/active/{username}")
+    public ResponseEntity<UserDTO> toggleVisibleState(@PathVariable String username) {
+        ResponseEntity<UserDTO> responseEntity = authenticationService.changeUserState(username);
+        if (responseEntity != null) {
+            return responseEntity; // Return the response from changeImageVisibleState
+        } else {
+            return ResponseEntity.notFound().build(); // Return a 404 response if changeImageVisibleState returns null
+        }
+    }
     @GetMapping("/all")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = authenticationService.getAllUsers();

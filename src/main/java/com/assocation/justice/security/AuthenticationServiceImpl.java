@@ -1,21 +1,24 @@
 package com.assocation.justice.security;
 
-import com.assocation.justice.dto.JwtAuthenticationResponse;
-import com.assocation.justice.dto.SignUpRequest;
-import com.assocation.justice.dto.SigninRequest;
-import com.assocation.justice.dto.UserDTO;
+import com.assocation.justice.dto.*;
+import com.assocation.justice.entity.Image;
 import com.assocation.justice.entity.User;
 import com.assocation.justice.repository.UserRepository;
+import com.assocation.justice.service.impl.ImageServiceImpl;
 import com.assocation.justice.util.enumeration.Role;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
     @Override
     public JwtAuthenticationResponse signup(SignUpRequest request) {
@@ -57,6 +61,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         List<User> users = userRepository.findAll();
         return users.stream().map(this::mapUserToUserDto).collect(Collectors.toList());
     }
+
+    @Override
+    public ResponseEntity<UserDTO> changeUserState(String username) {
+        User user = userRepository.findUserByUsername(username).orElseThrow(IllegalArgumentException::new);
+        user.setConfirmed(!user.isConfirmed());
+        // Save the updated image back to the repository
+        user = userRepository.save(user);
+        logger.info("User = " + username + " change his status");
+        // Return a ResponseEntity with the updated image and an HTTP status code
+        return ResponseEntity.ok(mapUserToUserDto(user));
+    }
+
     // Rest of your existing methods
 
     public UserDTO mapUserToUserDto(User user) {
