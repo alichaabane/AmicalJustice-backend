@@ -1,14 +1,18 @@
 package com.assocation.justice.resource;
 
 import com.assocation.justice.dto.*;
+import com.assocation.justice.entity.User;
 import com.assocation.justice.security.AuthenticationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
 
+import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -19,28 +23,20 @@ public class AuthenticationResource {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signup")
-    public ResponseEntity<JwtAuthenticationResponse> signup(@RequestBody SignUpRequest request) {
-        return ResponseEntity.ok(authenticationService.signup(request));
+    public ResponseEntity<?> signup(@RequestBody SignUpRequest request) {
+        return authenticationService.signup(request);
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<JwtAuthenticationResponse> signin(@RequestBody SigninRequest request) {
-        JwtAuthenticationResponse jwtAuthenticationResponse = authenticationService.signin(request);
-        if(jwtAuthenticationResponse != null) {
-            return ResponseEntity.ok(jwtAuthenticationResponse);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<?> signin(@RequestBody SigninRequest request) {
+        return authenticationService.signin(request);
     }
 
     @PutMapping("/active/{username}")
     public ResponseEntity<UserDTO> toggleVisibleState(@PathVariable String username) {
         ResponseEntity<UserDTO> responseEntity = authenticationService.changeUserState(username);
-        if (responseEntity != null) {
-            return responseEntity; // Return the response from changeImageVisibleState
-        } else {
-            return ResponseEntity.notFound().build(); // Return a 404 response if changeImageVisibleState returns null
-        }
+        // Return a 404 response if changeImageVisibleState returns null
+        return Objects.requireNonNullElseGet(responseEntity, () -> ResponseEntity.notFound().build()); // Return the response from changeImageVisibleState
     }
     @GetMapping("/all")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
@@ -52,4 +48,25 @@ public class AuthenticationResource {
         }
     }
 
+    @PutMapping("")
+    public ResponseEntity<?> updateUser(@RequestBody SignUpRequest request) {
+        return authenticationService.updateUser(request);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        authenticationService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/current")
+    public ResponseEntity<?> currentUserName(Authentication authentication) {
+        UserDTO user = this.authenticationService.getCurrentUser(authentication);
+            if(user != null) {
+            return ResponseEntity.ok(user);
+        } else {
+            // Handle the case when the current user is not found or authenticated
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+    }
 }
