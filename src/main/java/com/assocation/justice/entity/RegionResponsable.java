@@ -35,4 +35,7 @@ public class RegionResponsable {
     @OneToMany(mappedBy = "regionResponsable", cascade = CascadeType.ALL,  orphanRemoval = true)
     private List<Responsable> responsables = new ArrayList<>();
 
+    @OneToMany(mappedBy = "regionResponsable", cascade = CascadeType.ALL,  orphanRemoval = true)
+    private List<Adherent> adherents = new ArrayList<>();
+
 }
