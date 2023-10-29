@@ -8,9 +8,9 @@ import java.util.List;
 
 public interface AdherentService {
     AdherentDTO createAdherent(AdherentDTO adherentDTO);
-    AdherentDTO getAdherentById(Long id);
+    AdherentDTO getAdherentById(Integer cin);
     List<AdherentDTO> getAllAdherents();
-    AdherentDTO updateAdherent(Long id, AdherentDTO adherentDTO);
-    void deleteAdherent(Long id);
+    public AdherentDTO updateAdherent(Integer cin, AdherentDTO adherentDTO);
+    void deleteAdherent(Integer cin);
     List<AdherentDTO> getAdherentsByRegionResponsable(RegionResponsableDTO regionResponsable);
 }

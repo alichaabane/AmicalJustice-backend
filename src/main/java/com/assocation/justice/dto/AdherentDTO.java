@@ -1,5 +1,12 @@
 package com.assocation.justice.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AdherentDTO {
     private Integer cin;
     private String nom;
