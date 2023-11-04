@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface AdherentRepository extends JpaRepository<Adherent, Integer> {
-    List<Adherent> findByRegionResponsable(RegionResponsableDTO regionResponsable);
+    List<Adherent> findAllByRegionResponsableId(Long regionResponsableId);
 }

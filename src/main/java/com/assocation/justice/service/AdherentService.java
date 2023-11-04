@@ -12,5 +12,5 @@ public interface AdherentService {
     List<AdherentDTO> getAllAdherents();
     public AdherentDTO updateAdherent(Integer cin, AdherentDTO adherentDTO);
     void deleteAdherent(Integer cin);
-    List<AdherentDTO> getAdherentsByRegionResponsable(RegionResponsableDTO regionResponsable);
+    List<AdherentDTO> getAdherentsByRegionResponsable(Long regionResponsableId);
 }

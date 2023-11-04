@@ -4,7 +4,6 @@ import com.assocation.justice.dto.AdherentDTO;
 import com.assocation.justice.dto.RegionResponsableDTO;
 import com.assocation.justice.entity.Adherent;
 import com.assocation.justice.entity.RegionResponsable;
-import com.assocation.justice.entity.Responsable;
 import com.assocation.justice.repository.AdherentRepository;
 import com.assocation.justice.repository.RegionResponsableRepository;
 import com.assocation.justice.service.AdherentService;
@@ -37,8 +36,14 @@ public class AdherentServiceImpl implements AdherentService {
         Adherent adherent = mapToAdherent(adherentDTO);
         // Add logic for saving the adherent to the database
         // Assuming adherentRepository is the repository for Adherent entities
-        adherent = adherentRepository.save(adherent);
-        return mapToAdherentDTO(adherent);
+        if(adherent != null) {
+            adherent = adherentRepository.save(adherent);
+            logger.info("Adherent created successfully");
+            return mapToAdherentDTO(adherent);
+        } else {
+            logger.error("Error in creation of adherent");
+            return null;
+        }
     }
 
     @Override
@@ -46,9 +51,11 @@ public class AdherentServiceImpl implements AdherentService {
         // Retrieve the Adherent entity by id
         Adherent adherent = adherentRepository.findById(cin).orElse(null);
         if(adherent != null) {
+            logger.info("Fetching Adherent with CIN = " + adherent.getCin().toString().substring(4));
             return mapToAdherentDTO(adherent);
         }
         else {
+            logger.error("Error in fetching Adherent with CIN = " + cin.toString().substring(4));
             return null;
         }
     }
@@ -56,6 +63,7 @@ public class AdherentServiceImpl implements AdherentService {
     @Override
     public List<AdherentDTO> getAllAdherents() {
         List<Adherent> adherents = adherentRepository.findAll();
+        logger.info("Fetching All Adherents successfully");
         return adherents.stream().map(this::mapToAdherentDTO).collect(Collectors.toList());
     }
 
@@ -63,24 +71,27 @@ public class AdherentServiceImpl implements AdherentService {
     public AdherentDTO updateAdherent(Integer cin, AdherentDTO adherentDTO) {
         Adherent existingAdherent = adherentRepository.findById(cin).orElse(null);
         if (existingAdherent != null) {
+            logger.info("updating Adherent with CIN = " + cin.toString().substring(4) + " with success");
             Adherent updatedAdherent = mapToAdherent(adherentDTO);
             updatedAdherent.setCin(existingAdherent.getCin());
             // Add necessary logic for updating the adherent
             updatedAdherent = adherentRepository.save(updatedAdherent);
             return mapToAdherentDTO(updatedAdherent);
         }
+        logger.info("Error during the update of adherent with CIN = " + cin.toString().substring(4));
         return null; // or handle the case where the adherent doesn't exist
     }
 
     @Override
     public void deleteAdherent(Integer cin) {
         // Add logic for deleting the adherent by id
+        logger.info("Adherent deleted successfully");
         adherentRepository.deleteById(cin);
     }
 
     @Override
-    public List<AdherentDTO> getAdherentsByRegionResponsable(RegionResponsableDTO regionResponsable) {
-        List<Adherent> adherents = adherentRepository.findByRegionResponsable(regionResponsable);
+    public List<AdherentDTO> getAdherentsByRegionResponsable(Long regionResponsableId) {
+        List<Adherent> adherents = adherentRepository.findAllByRegionResponsableId(regionResponsableId);
         return adherents.stream()
                 .map(this::mapToAdherentDTO)
                 .collect(Collectors.toList());
