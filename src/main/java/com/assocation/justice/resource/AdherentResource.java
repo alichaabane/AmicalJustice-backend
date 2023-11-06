@@ -1,13 +1,15 @@
 package com.assocation.justice.resource;
 
 import com.assocation.justice.dto.AdherentDTO;
-import com.assocation.justice.dto.RegionResponsableDTO;
 import com.assocation.justice.service.AdherentService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +39,16 @@ public class AdherentResource {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/export-xlsx")
+    public void exportAdherentList(HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=adherents.xlsx");
+
+        List<AdherentDTO> adherents = adherentService.getAllAdherents(); // Replace with your data retrieval logic
+        Workbook workbook = adherentService.exportAdherentListToExcel(adherents);
+        workbook.write(response.getOutputStream());
     }
 
     @GetMapping

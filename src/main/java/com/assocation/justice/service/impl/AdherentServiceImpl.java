@@ -1,13 +1,16 @@
 package com.assocation.justice.service.impl;
 
 import com.assocation.justice.dto.AdherentDTO;
-import com.assocation.justice.dto.RegionResponsableDTO;
 import com.assocation.justice.entity.Adherent;
 import com.assocation.justice.entity.RegionResponsable;
 import com.assocation.justice.repository.AdherentRepository;
 import com.assocation.justice.repository.RegionResponsableRepository;
 import com.assocation.justice.service.AdherentService;
 import com.assocation.justice.util.enumeration.SituationFamiliale;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,6 +100,59 @@ public class AdherentServiceImpl implements AdherentService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Workbook exportAdherentListToExcel(List<AdherentDTO> adherents) {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Adherents");
+
+        // Add headers
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("بطاقة التعريف الوطنية");
+        headerRow.createCell(1).setCellValue("الأسم و اللقب");
+        headerRow.createCell(2).setCellValue("تاريخ الميلاد");
+        headerRow.createCell(3).setCellValue("مكان الميلاد");
+        headerRow.createCell(4).setCellValue("الرقم الوطني");
+        headerRow.createCell(5).setCellValue("رقم التسجيل");
+        headerRow.createCell(6).setCellValue("الوظيفة");
+        headerRow.createCell(7).setCellValue("المقر المنخرط به ");
+        headerRow.createCell(8).setCellValue("الحالة العائلية");
+        headerRow.createCell(9).setCellValue("مستوى التعليم للابن الأول"); //TODO
+        headerRow.createCell(10).setCellValue("مستوى التعليم للابن الثاني");
+        headerRow.createCell(11).setCellValue("مستوى التعليم للابن الثالث");
+        headerRow.createCell(12).setCellValue("مستوى التعليم للابن الرابع");
+        headerRow.createCell(13).setCellValue("مستوى التعليم للابن الخامس");
+        headerRow.createCell(14).setCellValue("مستوى التعليم للابن السادس");
+        // Add more headers as needed
+
+        // Add data to the Excel file
+        int rowNum = 1;
+        for (AdherentDTO adherent : adherents) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(adherent.getCin());
+            row.createCell(1).setCellValue(adherent.getNom());
+            row.createCell(2).setCellValue(adherent.getBirthday());
+            row.createCell(3).setCellValue(adherent.getBirthdayPlace());
+            row.createCell(4).setCellValue(adherent.getMatricule());
+            row.createCell(5).setCellValue(adherent.getNumeroInscription());
+            row.createCell(6).setCellValue(adherent.getAdherentJob());
+            row.createCell(7).setCellValue(adherent.getRegionResponsibleId());
+            row.createCell(8).setCellValue(adherent.getSituationFamiliale());
+            row.createCell(9).setCellValue(adherent.getChild1EducationLevel());
+            row.createCell(10).setCellValue(adherent.getChild2EducationLevel());
+            row.createCell(11).setCellValue(adherent.getChild3EducationLevel());
+            row.createCell(12).setCellValue(adherent.getChild4EducationLevel());
+            row.createCell(13).setCellValue(adherent.getChild5EducationLevel());
+            row.createCell(14).setCellValue(adherent.getChild6EducationLevel());
+            // Add more data fields as needed
+        }
+
+        // Adjust column width
+        for (int i = 0; i < 15; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        return workbook;
+    }
 
     public AdherentDTO mapToAdherentDTO(Adherent adherent) {
         AdherentDTO adherentDTO = new AdherentDTO();
