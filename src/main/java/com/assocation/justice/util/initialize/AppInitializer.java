@@ -32,7 +32,7 @@ public class AppInitializer implements CommandLineRunner {
     public void run(String... args) {
         if (authenticationService.getAllUsers().isEmpty()) {
         logger.info("No User found. creating some users");
-        SignUpRequest user = new SignUpRequest("Ramzi", "Bessadi", "ramzibessadi2023", "ramzi2023_", true, Role.SUPER_ADMIN);
+        SignUpRequest user = new SignUpRequest(null,"Ramzi", "Bessadi", "ramzibessadi2023", "ramzi2023_", true, Role.SUPER_ADMIN);
         authenticationService.signup(user);
         logger.info("User initialized and created successfully");
         }

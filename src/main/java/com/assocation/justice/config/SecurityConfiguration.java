@@ -30,14 +30,15 @@ public class SecurityConfiguration {
 
     private static final String[] AUTH_WHITELIST = {
             "/api/auth/signin",
-            "/api/auth/signup"
+            "/api/auth/signup",
     };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers(requestMatcherForPort(4200)).permitAll()
+                        request.requestMatchers(AUTH_WHITELIST).permitAll()
+                        .requestMatchers(requestMatcherForPort(4200)).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider()).addFilterBefore(

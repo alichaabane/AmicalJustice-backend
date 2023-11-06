@@ -15,12 +15,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,6 +79,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    public UserDTO getUserById(Long id) {
+        Optional<User> user = this.userRepository.findById(id);
+        return user.map(this::mapUserToUserDto).orElse(null);
+    }
+
+    @Override
     public ResponseEntity<UserDTO> changeUserState(String username) {
         User user = userRepository.findUserByUsername(username).orElseThrow(IllegalArgumentException::new);
         user.setConfirmed(!user.isConfirmed());
@@ -91,11 +97,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public ResponseEntity<?> updateUser(SignUpRequest signUpRequest) {
-        User user = userRepository.findUserByUsername(signUpRequest.getUsername()).orElse(null);
+        User user = userRepository.findById(signUpRequest.getId()).orElse(null);
         if(user != null) {
             user.setLastName(signUpRequest.getLastName());
             user.setFirstName(signUpRequest.getFirstName());
-            user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+            if(signUpRequest.getPassword() != null) {
+                user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+            }
             // save the updated user
             user = userRepository.save(user);
             logger.info("User " + signUpRequest.getUsername() + " updated successfully");
@@ -123,11 +131,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public UserDTO mapUserToUserDto(User user) {
         UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
         userDTO.setConfirmed(user.isConfirmed());
-        userDTO.setUsername(user.getUsername());
+        if(user.getUsername()!= null) {
+            userDTO.setUsername(user.getUsername());
+        }
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
-        userDTO.setPassword(user.getPassword());
+        userDTO.setPassword(passwordEncoder.encode(user.getPassword()));
         userDTO.setRole(user.getRole());
 
         return userDTO;

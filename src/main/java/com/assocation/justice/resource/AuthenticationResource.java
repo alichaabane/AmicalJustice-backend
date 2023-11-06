@@ -1,19 +1,17 @@
 package com.assocation.justice.resource;
 
-import com.assocation.justice.dto.*;
-import com.assocation.justice.entity.User;
+import com.assocation.justice.dto.SignUpRequest;
+import com.assocation.justice.dto.SigninRequest;
+import com.assocation.justice.dto.UserDTO;
 import com.assocation.justice.security.AuthenticationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import lombok.RequiredArgsConstructor;
-
-import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
@@ -38,6 +36,7 @@ public class AuthenticationResource {
         // Return a 404 response if changeImageVisibleState returns null
         return Objects.requireNonNullElseGet(responseEntity, () -> ResponseEntity.notFound().build()); // Return the response from changeImageVisibleState
     }
+
     @GetMapping("/all")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = authenticationService.getAllUsers();
@@ -48,7 +47,7 @@ public class AuthenticationResource {
         }
     }
 
-    @PutMapping("")
+    @PutMapping("/update")
     public ResponseEntity<?> updateUser(@RequestBody SignUpRequest request) {
         return authenticationService.updateUser(request);
     }
@@ -59,10 +58,20 @@ public class AuthenticationResource {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+       UserDTO userDTO = authenticationService.getUserById(id);
+       if(userDTO != null) {
+           return ResponseEntity.ok(userDTO);
+       } else {
+           return ResponseEntity.notFound().build(); // Or handle the case when no users are found
+       }
+    }
+
     @GetMapping("/current")
     public ResponseEntity<?> currentUserName(Authentication authentication) {
         UserDTO user = this.authenticationService.getCurrentUser(authentication);
-            if(user != null) {
+        if (user != null) {
             return ResponseEntity.ok(user);
         } else {
             // Handle the case when the current user is not found or authenticated
