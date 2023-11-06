@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 //TODO
@@ -136,6 +137,15 @@ public class AdherentServiceImpl implements AdherentService {
             row.createCell(5).setCellValue(adherent.getNumeroInscription());
             row.createCell(6).setCellValue(adherent.getAdherentJob());
             row.createCell(7).setCellValue(adherent.getRegionResponsibleId());
+            if (adherent.getRegionResponsibleId() != null) {
+                Optional<RegionResponsable> regionResponsable = regionResponsableRepository.findById(adherent.getRegionResponsibleId());
+                if(regionResponsable.isPresent()) {
+                   String nomRegion = regionResponsable.get().getNom();
+                    row.createCell(7).setCellValue(nomRegion);
+                } else {
+                    row.createCell(7).setCellValue("X");
+                }
+            }
             row.createCell(8).setCellValue(adherent.getSituationFamiliale());
             row.createCell(9).setCellValue(adherent.getChild1EducationLevel());
             row.createCell(10).setCellValue(adherent.getChild2EducationLevel());
