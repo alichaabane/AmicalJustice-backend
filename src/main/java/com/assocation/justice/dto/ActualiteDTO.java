@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ImageDTO {
+public class ActualiteDTO {
     private Long id;
     private String name;
     private String title;

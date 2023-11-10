@@ -1,18 +1,15 @@
 package com.assocation.justice.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.core.annotation.Order;
 
 @Entity
 @Data
 @Order(3) // Specify the order for table creation
-public class Image {
+public class Actualite {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(columnDefinition = "TEXT")

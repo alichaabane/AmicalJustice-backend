@@ -3,12 +3,10 @@ package com.assocation.justice.util.initialize;
 import com.assocation.justice.dto.RegionResponsableDTO2;
 import com.assocation.justice.dto.ResponsableDTO;
 import com.assocation.justice.dto.SignUpRequest;
-import com.assocation.justice.entity.User;
 import com.assocation.justice.security.AuthenticationService;
 import com.assocation.justice.service.RegionResponsableService;
 import com.assocation.justice.service.ResponsableService;
-import com.assocation.justice.service.UserService;
-import com.assocation.justice.service.impl.ImageServiceImpl;
+import com.assocation.justice.service.impl.ActualiteServiceImpl;
 import com.assocation.justice.util.enumeration.CategoryResponsable;
 import com.assocation.justice.util.enumeration.Region;
 import com.assocation.justice.util.enumeration.Role;
@@ -22,7 +20,7 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class AppInitializer implements CommandLineRunner {
 
-    private final Logger logger = LoggerFactory.getLogger(ImageServiceImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(ActualiteServiceImpl.class);
 
     private final ResponsableService responsableService;
     private final RegionResponsableService regionResponsableService;

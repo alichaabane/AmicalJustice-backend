@@ -1,8 +1,8 @@
 package com.assocation.justice.repository;
 
-import com.assocation.justice.entity.Image;
+import com.assocation.justice.entity.Actualite;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ImageRepository extends JpaRepository<Image, Long> {
+public interface ActualiteRepository extends JpaRepository<Actualite, Long> {
     String findImageByName(String name);
 }
