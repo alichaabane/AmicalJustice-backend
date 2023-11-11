@@ -3,10 +3,16 @@ package com.assocation.justice.resource;
 import com.assocation.justice.dto.ActualiteDTO;
 import com.assocation.justice.service.ActualiteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 @RestController
@@ -20,7 +26,7 @@ public class ActualitesResource {
         this.actualiteService = actualiteService;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/image/{id}")
     public ResponseEntity<ActualiteDTO> getImageById(@PathVariable Long id) {
         ActualiteDTO actualiteDTO = actualiteService.getActualiteById(id);
         if (actualiteDTO != null) {
@@ -35,6 +41,27 @@ public class ActualitesResource {
         List<ActualiteDTO> imageDTOs = actualiteService.getAllImages();
         return ResponseEntity.ok(imageDTOs);
     }
+
+    @GetMapping("/{filename:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) throws IOException {
+        Resource resource = new ClassPathResource("static/uploads/" + filename);
+        String mediaTypeString = determineMediaType(filename);
+
+        return ResponseEntity.ok()
+                .contentLength(resource.contentLength())
+                .contentType(MediaType.parseMediaType(mediaTypeString) ) // Adjust content type based on your image type
+                .body(resource);
+    }
+
+    private String determineMediaType(String filename) {
+        if (filename.toLowerCase().endsWith(".webp")) {
+            return "image/webp";
+        } else {
+            // Default to JPEG if the format is not recognized
+            return "image/jpeg";
+        }
+    }
+
 
     @PostMapping("/upload")
     public ActualiteDTO uploadImage(@RequestParam("file") MultipartFile file,

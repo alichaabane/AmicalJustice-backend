@@ -52,9 +52,10 @@ public class ActualiteServiceImpl implements ActualiteService {
     public ActualiteDTO saveImage(MultipartFile file, ActualiteDTO newImageDTO) {
         try {
             // Load the uploads directory as a resource
+            System.out.println(file.getOriginalFilename());
             Path copyLocation = Paths.get(uploadDir + File.separator + StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())));
             Files.copy(file.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            String fileName = System.currentTimeMillis() + "_" + extractImageName(Objects.requireNonNull(file.getOriginalFilename())) + ".webp";
 
             // Set the filename in the DTO
             newImageDTO.setName(fileName);
@@ -106,10 +107,10 @@ public class ActualiteServiceImpl implements ActualiteService {
 
         try {
             if (file != null) {
+
                 // A new file is provided, update the file
                 Files.createDirectories(Path.of(uploadDir));
-
-                String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                String fileName = System.currentTimeMillis() + "_" + extractImageName(Objects.requireNonNull(file.getOriginalFilename())) + ".webp";
                 Path filePath = Path.of(uploadDir, fileName);
 
                 // Check if the existing file should be deleted
@@ -134,6 +135,10 @@ public class ActualiteServiceImpl implements ActualiteService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to update the file", e);
         }
+    }
+
+    String extractImageName(String fileName ) {
+       return fileName.substring(0,fileName.indexOf('.')).trim();
     }
 
 
