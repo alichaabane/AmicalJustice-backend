@@ -55,7 +55,7 @@ public class ActualiteServiceImpl implements ActualiteService {
             System.out.println(file.getOriginalFilename());
             Path copyLocation = Paths.get(uploadDir + File.separator + StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())));
             Files.copy(file.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
-            String fileName = System.currentTimeMillis() + "_" + extractImageName(Objects.requireNonNull(file.getOriginalFilename())) + ".webp";
+            String fileName = Objects.requireNonNull(file.getOriginalFilename());
 
             // Set the filename in the DTO
             newImageDTO.setName(fileName);
@@ -110,7 +110,7 @@ public class ActualiteServiceImpl implements ActualiteService {
 
                 // A new file is provided, update the file
                 Files.createDirectories(Path.of(uploadDir));
-                String fileName = System.currentTimeMillis() + "_" + extractImageName(Objects.requireNonNull(file.getOriginalFilename())) + ".webp";
+                String fileName = Objects.requireNonNull(file.getOriginalFilename());
                 Path filePath = Path.of(uploadDir, fileName);
 
                 // Check if the existing file should be deleted
