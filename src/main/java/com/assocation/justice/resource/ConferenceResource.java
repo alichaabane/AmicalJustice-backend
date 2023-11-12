@@ -7,12 +7,16 @@ import com.assocation.justice.service.ConferenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -82,11 +86,12 @@ public class ConferenceResource {
     }
 
     @GetMapping("/{filename:.+}")
-    public ResponseEntity<Resource> getConference(@PathVariable String filename) throws IOException {
-        Resource resource = new ClassPathResource("static/conferences/" + filename);
+    public ResponseEntity<?> getConference(@PathVariable String filename) throws MalformedURLException {
+        Path filePath = Paths.get("src", "main", "resources", "static", "conferences", filename);
+        UrlResource resource = new UrlResource(filePath.toUri());
+
         return ResponseEntity.ok()
-                .contentLength(resource.contentLength())
-                .contentType(MediaType.APPLICATION_PDF) // Adjust content type based on your image type
+                .contentType(MediaType.APPLICATION_PDF)
                 .body(resource);
     }
 

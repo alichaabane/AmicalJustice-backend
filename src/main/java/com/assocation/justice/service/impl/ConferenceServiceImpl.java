@@ -44,7 +44,7 @@ public class ConferenceServiceImpl implements ConferenceService {
     @Transactional
     public ConferenceDTO saveConference(MultipartFile file, ConferenceDTO newConferenceDTO) {
         try {
-            String fileName = newConferenceDTO.getTitle() != null ? newConferenceDTO.getTitle() : file.getOriginalFilename();
+            String fileName = newConferenceDTO.getName() != null ? newConferenceDTO.getName() : file.getOriginalFilename();
             assert fileName != null;
             fileName = fileName.replaceAll("\\s+", "_").trim();
 
@@ -117,9 +117,9 @@ public class ConferenceServiceImpl implements ConferenceService {
                 // A new file is provided, update the file
                 Files.createDirectories(Path.of(uploadConferenceDir));
 
-                String fileName = updatedConferenceDTO.getTitle() != null ? updatedConferenceDTO.getTitle() : file.getOriginalFilename();
+                String fileName = updatedConferenceDTO.getName() != null ? updatedConferenceDTO.getName() : file.getOriginalFilename();
                 assert fileName != null;
-                fileName = fileName.replaceAll("\\s+", "_").trim();
+                fileName = fileName.replaceAll("\\s+", "_").trim() ;
 
                 Path filePath = Path.of(uploadConferenceDir, fileName);
 
