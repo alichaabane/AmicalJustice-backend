@@ -2,19 +2,13 @@ package com.assocation.justice.service.impl;
 
 import com.assocation.justice.dto.ActualiteDTO;
 import com.assocation.justice.entity.Actualite;
-import com.assocation.justice.entity.Actualite;
 import com.assocation.justice.repository.ActualiteRepository;
 import com.assocation.justice.service.ActualiteService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,18 +30,17 @@ import java.util.stream.Collectors;
 public class ActualiteServiceImpl implements ActualiteService {
     private final Logger logger = LoggerFactory.getLogger(ActualiteServiceImpl.class);
     private final ActualiteRepository actualiteRepository;
-    private final ResourceLoader resourceLoader;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
 
     @Autowired
-    public ActualiteServiceImpl(ActualiteRepository actualiteRepository, ResourceLoader resourceLoader) {
+    public ActualiteServiceImpl(ActualiteRepository actualiteRepository) {
         this.actualiteRepository = actualiteRepository;
-        this.resourceLoader = resourceLoader;
     }
 
     @Override
+    @Transactional
     public ActualiteDTO saveImage(MultipartFile file, ActualiteDTO newImageDTO) {
         try {
             // Load the uploads directory as a resource
