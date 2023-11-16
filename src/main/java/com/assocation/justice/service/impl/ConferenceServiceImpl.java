@@ -1,6 +1,7 @@
 package com.assocation.justice.service.impl;
 
 import com.assocation.justice.dto.ConferenceDTO;
+import com.assocation.justice.dto.PageRequestData;
 import com.assocation.justice.entity.Conference;
 import com.assocation.justice.repository.ConferenceRepository;
 import com.assocation.justice.service.ConferenceService;
@@ -9,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,13 +102,17 @@ public class ConferenceServiceImpl implements ConferenceService {
     }
 
     @Override
-    public List<ConferenceDTO> getAllConferences() {
-        List<Conference> conferences = conferenceRepository.findAll();
-        List<ConferenceDTO> conferenceDTOS = conferences.stream()
-                .map(this::mapConferenceToDTO)
-                .collect(Collectors.toList());
+    public PageRequestData<ConferenceDTO> getAllConferences(PageRequest pageRequest) {
         logger.info("Conference list fetched successfully");
-        return conferenceDTOS;
+        Page<Conference> conferencePage = conferenceRepository.findAll(pageRequest);
+        PageRequestData<ConferenceDTO> customPageResponse = new PageRequestData<>();
+        customPageResponse.setContent(conferencePage.map(this::mapConferenceToDTO).getContent());
+        customPageResponse.setTotalPages(conferencePage.getTotalPages());
+        customPageResponse.setTotalElements(conferencePage.getTotalElements());
+        customPageResponse.setNumber(conferencePage.getNumber());
+        customPageResponse.setSize(conferencePage.getSize());
+
+        return customPageResponse;
     }
 
     @Override

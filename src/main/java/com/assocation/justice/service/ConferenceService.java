@@ -1,6 +1,9 @@
 package com.assocation.justice.service;
 
 import com.assocation.justice.dto.ConferenceDTO;
+import com.assocation.justice.dto.PageRequestData;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,7 +14,7 @@ public interface ConferenceService {
 
     ConferenceDTO getConferenceById(Long id);
 
-    List<ConferenceDTO> getAllConferences();
+    PageRequestData<ConferenceDTO> getAllConferences(PageRequest pageRequest);
 
     ConferenceDTO updateConference(Long conferenceId, MultipartFile file, ConferenceDTO updatedConferenceDTO);
 

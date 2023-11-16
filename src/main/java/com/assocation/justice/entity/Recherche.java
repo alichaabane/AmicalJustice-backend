@@ -8,9 +8,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "conference") // Define table name if needed
+@Table(name = "recherche") // Define table name if needed
 @Data
-public class Conference {
+public class Recherche {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,5 +32,6 @@ public class Conference {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
 
 }

@@ -2,12 +2,15 @@ package com.assocation.justice.resource;
 
 import com.assocation.justice.dto.ActualiteDTO;
 import com.assocation.justice.dto.ConferenceDTO;
+import com.assocation.justice.dto.PageRequestData;
 import com.assocation.justice.service.ActualiteService;
 import com.assocation.justice.service.ConferenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,9 +60,13 @@ public class ConferenceResource {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<ConferenceDTO>> getAllConferences() {
-        List<ConferenceDTO> imageDTOs = conferenceService.getAllConferences();
-        return ResponseEntity.ok(imageDTOs);
+    public ResponseEntity<PageRequestData<ConferenceDTO>> getAllConferences(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        PageRequestData<ConferenceDTO> conferencePage = conferenceService.getAllConferences(pageRequest);
+        return ResponseEntity.ok(conferencePage);
     }
 
     @PostMapping("/upload")
