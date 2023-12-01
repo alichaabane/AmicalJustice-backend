@@ -6,6 +6,7 @@ import com.assocation.justice.service.MagazineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -94,6 +95,22 @@ public class MagazineResource {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(resource);
     }
+
+
+    @GetMapping("/video/{filename:.+}")
+    public ResponseEntity<?> getVideo(@PathVariable String filename) throws MalformedURLException {
+        Path filePath = Paths.get("src", "main", "resources", "static", "videos", filename + ".mp4");
+        UrlResource resource = new UrlResource(filePath.toUri());
+
+        // Set the content type for MP4 video
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("video/mp4"));
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(resource);
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMagazine(@PathVariable Long id) {
