@@ -11,6 +11,7 @@ import java.util.Optional;
 
 public interface RegionResponsableRepository extends JpaRepository<RegionResponsable, Long> {
     RegionResponsable findByRegion(Region region);
+    RegionResponsable findByNom(String nom);
     List<RegionResponsable> findAllByRegion(Region region);
 
 }

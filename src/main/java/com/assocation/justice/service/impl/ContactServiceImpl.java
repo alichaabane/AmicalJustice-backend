@@ -31,8 +31,8 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public ContactDTO saveContact(ContactDTO contactDTO) {
-        Region regionResponsableCity = contactDTO.getRegionResponsableCity();
-        RegionResponsable regionResponsable = regionResponsableRepository.findByRegion(regionResponsableCity);
+        String regionResponsableName = contactDTO.getRegionResponsableName();
+        RegionResponsable regionResponsable = regionResponsableRepository.findByNom(regionResponsableName);
 
         if (regionResponsable != null) {
             // Create the Responsable entity

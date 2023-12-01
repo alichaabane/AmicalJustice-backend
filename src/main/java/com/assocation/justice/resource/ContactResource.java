@@ -1,8 +1,6 @@
 package com.assocation.justice.resource;
 
 import com.assocation.justice.dto.ContactDTO;
-import com.assocation.justice.dto.ResponsableDTO;
-import com.assocation.justice.entity.Contact;
 import com.assocation.justice.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
