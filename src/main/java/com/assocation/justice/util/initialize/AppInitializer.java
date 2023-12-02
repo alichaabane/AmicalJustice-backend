@@ -1,5 +1,6 @@
 package com.assocation.justice.util.initialize;
 
+import com.assocation.justice.dto.RegionResponsableDTO;
 import com.assocation.justice.dto.RegionResponsableDTO2;
 import com.assocation.justice.dto.ResponsableDTO;
 import com.assocation.justice.dto.SignUpRequest;
@@ -16,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @AllArgsConstructor
 public class AppInitializer implements CommandLineRunner {
@@ -28,12 +31,6 @@ public class AppInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (authenticationService.getAllUsers().isEmpty()) {
-        logger.info("No User found. creating some users");
-        SignUpRequest user = new SignUpRequest(null,"Ramzi", "Bessadi", "ramzibessadi2023", "ramzi2023_", true, Role.SUPER_ADMIN);
-        authenticationService.signup(user);
-        logger.info("User initialized and created successfully");
-        }
 
         RegionResponsableDTO2 regionResponsableDTO2 = null;
         if (regionResponsableService.getAllRegionResponsables().isEmpty()) {
@@ -41,6 +38,16 @@ public class AppInitializer implements CommandLineRunner {
         regionResponsableDTO2 = new RegionResponsableDTO2(null, "قفصة", "34.4208066" , "8.7731791", Region.قفصة, "76200400");
         logger.info("Region Responsable initialized and created successfully");
         }
+
+        if (authenticationService.getAllUsers().isEmpty()) {
+            logger.info("No User found. creating some users");
+            List<RegionResponsableDTO> regionResponsableDTOList = regionResponsableService.getAllRegionResponsableByRegion("قفصة");
+            SignUpRequest user = new SignUpRequest(null,"Ramzi", "Bessadi", "ramzibessadi2023", "ramzi2023_",
+                    regionResponsableDTOList.get(0).getId() != null  ? regionResponsableDTOList.get(0).getId() : null, true, Role.SUPER_ADMIN);
+            authenticationService.signup(user);
+            logger.info("User initialized and created successfully");
+        }
+
         if (responsableService.getAllResponsables().isEmpty()) {
         logger.info("No Responsable found. creating some responsables");
         ResponsableDTO responsableDTO = new ResponsableDTO(null, "رمزي بالسعدي" , "98531554","ramzibessadi@yahoo.com",

@@ -1,5 +1,6 @@
 package com.assocation.justice.dto;
 
+import com.assocation.justice.util.enumeration.Region;
 import com.assocation.justice.util.enumeration.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -19,5 +20,6 @@ public class UserDTO {
         @JsonIgnore
         private String password;
         private Role role;
+        private Long regionResponsableId;
         private boolean confirmed;
 }

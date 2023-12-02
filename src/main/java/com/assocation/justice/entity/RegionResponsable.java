@@ -3,6 +3,7 @@ package com.assocation.justice.entity;
 import com.assocation.justice.util.enumeration.Region;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.core.annotation.Order;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.List;
 
 @Entity
 @Data
+@ToString(exclude = {"responsables", "adherents"})
 @Order(2) // Specify the order for table creation
 public class RegionResponsable {
 

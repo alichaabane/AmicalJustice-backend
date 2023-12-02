@@ -100,7 +100,7 @@ public class RegionResponsableServiceImpl implements RegionResponsableService {
     }
 
     /* DTO 2 */
-    private RegionResponsableDTO2 mapToRegionResponsableDTO2(RegionResponsable regionResponsable) {
+    public RegionResponsableDTO2 mapToRegionResponsableDTO2(RegionResponsable regionResponsable) {
         RegionResponsableDTO2 regionResponsableDTO = new RegionResponsableDTO2();
         regionResponsableDTO.setId(regionResponsable.getId());
         regionResponsableDTO.setNom(regionResponsable.getNom());
@@ -111,12 +111,11 @@ public class RegionResponsableServiceImpl implements RegionResponsableService {
         return regionResponsableDTO;
     }
 
-    private RegionResponsable mapToRegionResponsableEntity2(RegionResponsableDTO2 regionResponsableDTO) {
+    public RegionResponsable mapToRegionResponsableEntity2(RegionResponsableDTO2 regionResponsableDTO) {
         RegionResponsable regionResponsable = new RegionResponsable();
         regionResponsable.setNom(regionResponsableDTO.getNom());
         regionResponsable.setLongitude(regionResponsableDTO.getLongitude());
         regionResponsable.setLatitude(regionResponsableDTO.getLatitude());
-        regionResponsable.setRegion(regionResponsableDTO.getRegion());
         regionResponsable.setRegion(regionResponsableDTO.getRegion());
         regionResponsable.setFax(regionResponsableDTO.getFax());
         return regionResponsable;
@@ -134,7 +133,7 @@ public class RegionResponsableServiceImpl implements RegionResponsableService {
         return responsable;
     }
 
-    private RegionResponsable mapToRegionResponsableEntity(RegionResponsableDTO regionResponsableDTO) {
+    public RegionResponsable mapToRegionResponsableEntity(RegionResponsableDTO regionResponsableDTO) {
         RegionResponsable regionResponsable = new RegionResponsable();
         regionResponsable.setNom(regionResponsableDTO.getNom());
         regionResponsable.setLongitude(regionResponsableDTO.getLongitude());
@@ -151,7 +150,7 @@ public class RegionResponsableServiceImpl implements RegionResponsableService {
         return regionResponsable;
     }
 
-    private RegionResponsableDTO mapToRegionResponsableDTO(RegionResponsable regionResponsable) {
+    public RegionResponsableDTO mapToRegionResponsableDTO(RegionResponsable regionResponsable) {
         RegionResponsableDTO regionResponsableDTO = new RegionResponsableDTO();
         regionResponsableDTO.setId(regionResponsable.getId());
         regionResponsableDTO.setNom(regionResponsable.getNom());

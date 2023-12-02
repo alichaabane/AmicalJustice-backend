@@ -30,6 +30,9 @@ public class User implements UserDetails {
     @Column(columnDefinition = "boolean default false")
     private boolean confirmed;
 
+    @Column
+    private Long regionResponsableId;
+
     @Enumerated(EnumType.STRING)
     private Role role;
     @Override

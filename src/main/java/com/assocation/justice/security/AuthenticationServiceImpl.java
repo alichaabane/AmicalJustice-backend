@@ -43,6 +43,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         var user = User.builder().firstName(request.getFirstName()).lastName(request.getLastName())
                 .username(request.getUsername()).password(passwordEncoder.encode(request.getPassword()))
+                .regionResponsableId(request.getRegionResponsableId())
                 .role(request.getRole() != null ? request.getRole() : Role.ADMIN).build();
         userRepository.save(user);
         var jwt = jwtService.generateToken(user);
@@ -137,6 +138,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             userDTO.setUsername(user.getUsername());
         }
         userDTO.setFirstName(user.getFirstName());
+        userDTO.setLastName(user.getLastName());
+        userDTO.setLastName(user.getLastName());
+        userDTO.setRegionResponsableId(user.getRegionResponsableId());
         userDTO.setLastName(user.getLastName());
         userDTO.setPassword(passwordEncoder.encode(user.getPassword()));
         userDTO.setRole(user.getRole());

@@ -16,6 +16,7 @@ public class SignUpRequest {
     private String lastName;
     private String username;
     private String password;
+    private Long regionResponsableId;
     private boolean confirmed;
     private Role role;
 }
