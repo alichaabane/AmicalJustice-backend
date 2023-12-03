@@ -11,7 +11,7 @@
 	<groupId>com.association</groupId>
 	<artifactId>justice</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>justice</name>
+	<name>justice-backend</name>
 	<description>Justice Amicale project for Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>

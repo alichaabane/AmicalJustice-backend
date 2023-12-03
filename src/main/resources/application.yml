@@ -1,0 +1,43 @@
+server:
+  port: 8081
+application:
+  version: Amicale Justice
+spring-boot:
+  version: 1.0.0
+token:
+  signing:
+    key: 413F4428472B4B6250655368566D5970337336763979244226452948404D6351
+
+spring:
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/justice
+    username: root
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+      generate-ddl: true
+      show-sql: true
+  server:
+    error:
+      include-message: always
+
+############# Uploads directories #########
+app:
+  upload:
+    dir: src/main/resources/static/uploads
+  conference:
+    dir: src/main/resources/static/conferences
+  recherche:
+    dir: src/main/resources/static/recherches
+  magazine:
+    dir: src/main/resources/static/magazines
+
+  web:
+    resources:
+      static-locations: classpath:/static/,classpath:/uploads/,classpath:/conferences/,classpath:/recherches/,classpath:/magazines/
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
