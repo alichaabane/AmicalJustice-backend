@@ -12,6 +12,7 @@ public interface AuthenticationService {
     ResponseEntity<?> signup(SignUpRequest request);
 
     ResponseEntity<?> signin(SigninRequest request);
+    ResponseEntity<?> signinWithGoogle(SigninGoogleRequest request);
 
     ResponseEntity<UserDTO> changeUserState(String username);
     List<UserDTO> getAllUsers();

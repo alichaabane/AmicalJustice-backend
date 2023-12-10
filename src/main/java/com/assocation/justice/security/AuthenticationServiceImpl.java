@@ -1,16 +1,19 @@
 package com.assocation.justice.security;
 
-import com.assocation.justice.dto.JwtAuthenticationResponse;
-import com.assocation.justice.dto.SignUpRequest;
-import com.assocation.justice.dto.SigninRequest;
-import com.assocation.justice.dto.UserDTO;
+import com.assocation.justice.dto.*;
 import com.assocation.justice.entity.User;
 import com.assocation.justice.repository.UserRepository;
 import com.assocation.justice.util.enumeration.Role;
 import com.assocation.justice.util.enumeration.Source;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,7 +22,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,6 +38,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
+    @Value("${spring.security.oauth2.resourceserver.jwt.client-id}")
+    private String clientGoogleId;
     @Override
     public ResponseEntity<?> signup(SignUpRequest request) {
         // Check if the user already exists
@@ -57,29 +64,81 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public ResponseEntity<?> signin(SigninRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-        if(request.getSource().equals(Source.LOGIN)) {
-            var user = userRepository.findUserByUsername(request.getUsername()).orElse(null);
+        var user = userRepository.findUserByUsername(request.getUsername()).orElse(null);
 
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("USER NOT EXIST");
-            }
+        if(user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("USER NOT EXIST");
+        }
 
-            if (!user.isConfirmed() && !user.getRole().equals(Role.SUPER_ADMIN)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("USER NOT CONFIRMED");
-            }
+        if (!user.isConfirmed() && !user.getRole().equals(Role.SUPER_ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("USER NOT CONFIRMED");
+        }
 
-            var userDTO = mapUserToUserDto(user);
-            var jwt = jwtService.generateToken(user);
-            return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
-        } else {
-            var user = userRepository.findUserByEmail(request.getEmail()).orElse(null);
+        var userDTO = mapUserToUserDto(user);
+        var jwt = jwtService.generateToken(user);
+        return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
+    }
+
+
+    @Override
+    public ResponseEntity<?> signinWithGoogle(SigninGoogleRequest request) {
+        System.out.println("request = "+ request);
+        GoogleIdToken.Payload payload = this.getGoogleData(request.getIdToken());
+        User user = this.userRepository.findUserByEmail(payload.getEmail()).orElse(null);
+        if(user != null) {
+            user.setSource(Source.GOOGLE);
             var userDTO = mapUserToUserDto(user);
             var jwt = jwtService.generateToken(user);
             return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
         }
+        return ResponseEntity.notFound().build();
     }
+
+    public GoogleIdToken.Payload getGoogleData(String idToken) {
+        NetHttpTransport transport = new NetHttpTransport();
+        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                .setAudience(Collections.singletonList(clientGoogleId))
+                .build();
+
+        GoogleIdToken googleIdToken = null;
+        try {
+            googleIdToken = verifier.verify(idToken);
+            if (googleIdToken != null) {
+                System.out.println(googleIdToken.getPayload());
+                return googleIdToken.getPayload();
+            }
+        } catch (GeneralSecurityException | IOException e) {
+            e.printStackTrace(); // Logging the exception for debugging purposes
+            // Handle the exception according to your application's requirements
+        } finally {
+            return googleIdToken.getPayload();
+        }
+    }
+
+    public static void main(String[] args) {
+        NetHttpTransport transport = new NetHttpTransport();
+        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                .setAudience(Collections.singletonList("205380603904-0gq49n2s2i0pbk0u1j93j8vh6v2v74iu.apps.googleusercontent.com"))
+                .build();
+
+        try {
+            GoogleIdToken googleIdToken = verifier.verify("eyJhbGciOiJSUzI1NiIsImtpZCI6ImU0YWRmYjQzNmI5ZTE5N2UyZTExMDZhZjJjODQyMjg0ZTQ5ODZhZmYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIyMDUzODA2MDM5MDQtMGdxNDluMnMyaTBwYmswdTFqOTNqOHZoNnYydjc0aXUuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiIyMDUzODA2MDM5MDQtMGdxNDluMnMyaTBwYmswdTFqOTNqOHZoNnYydjc0aXUuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTAxMzI0NDgwNjE1MzI2OTA3NTAiLCJlbWFpbCI6ImFsaWNoYWFiYW5lOThAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5iZiI6MTcwMjIxNDg4NSwibmFtZSI6IkFsaSBDaGFhYmFuZSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NKX0Fwa05fZGl2MlA4RzlSXzhqWmNvUk5Rb1ZsOGJQV3hqREY4bmR0TnFNZmM9czk2LWMiLCJnaXZlbl9uYW1lIjoiQWxpIiwiZmFtaWx5X25hbWUiOiJDaGFhYmFuZSIsImxvY2FsZSI6ImZyIiwiaWF0IjoxNzAyMjE1MTg1LCJleHAiOjE3MDIyMTg3ODUsImp0aSI6ImViYjY3ODE2Njc1ZTEyZDE3NDQwNGZkZmMwMjRmYzc2NTFlMWU0MDIifQ.UB9OI-t00hMYU8OGqTb6eGfEJxZ468VxxcXo7sTMIh_CSjsQNu2BtApLUyq8JS9-DsoeTkNm2NrYuktnMXm-1FzDmXVS5KcK5E1irWt-ASFc2pZYUJOnBbL-ta2iAotvjkVUoHINlitUFT5jvY1VS-y1TkvK0NXJ2_FbuJAhH5f3RCvH6NwBaT29Bjl9kapkQCFHoEHXM-S39K9AuctqSHhDAY5d2O_8RStiO78hubOeH4ylmbvLmOuELADH3fA5SHrOBIGqRroxGpP75TEm4i6HCghpCk8zFzqjtvRs7n0IuXX-j4PtmIVFEodbr6PDrRcXeTyg2rchtNC-dvvBAA");
+            if (googleIdToken != null) {
+                System.out.println(googleIdToken.getPayload());
+            }
+        } catch (GeneralSecurityException | IOException e) {
+            e.printStackTrace(); // Logging the exception for debugging purposes
+            // Handle the exception according to your application's requirements
+        }
+        System.out.println("null");
+    }
+
 
     @Override
     public List<UserDTO> getAllUsers() {
@@ -163,6 +222,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
         userDTO.setLastName(user.getLastName());
+        if(!user.getSource().equals(Source.LOGIN)) {
+            userDTO.setSource(user.getSource());
+        } else {
+            userDTO.setSource(Source.LOGIN);
+        }
         userDTO.setRegionResponsableId(user.getRegionResponsableId());
         userDTO.setLastName(user.getLastName());
         userDTO.setPassword(passwordEncoder.encode(user.getPassword()));

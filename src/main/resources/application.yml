@@ -11,18 +11,12 @@ token:
 spring:
   security:
     oauth2:
-      client:
-        registration:
-          google:
-            clientId: 205380603904-1dd09q8040nl171vtm1tjs6dnp0vvf6c.apps.googleusercontent.com
-            client-secret: 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
-            scope: openid,email,profile
-
-          github:
-            clientId: Iv1.0a5ecda392c95673
-            client-secret: a884b7c9e70822d09dddd45f7e3da33104fdb7d7
-            scope: login
-
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+          issuer-uri: https://accounts.google.com
+          client-id: 205380603904-0gq49n2s2i0pbk0u1j93j8vh6v2v74iu.apps.googleusercontent.com
+          client-secret: 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
 
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
