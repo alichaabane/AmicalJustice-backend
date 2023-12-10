@@ -1,7 +1,7 @@
 package com.assocation.justice.resource;
 
 import com.assocation.justice.dto.SignUpRequest;
-import com.assocation.justice.dto.SigninGoogleRequest;
+import com.assocation.justice.dto.SigninProviderRequest;
 import com.assocation.justice.dto.SigninRequest;
 import com.assocation.justice.dto.UserDTO;
 import com.assocation.justice.security.AuthenticationService;
@@ -31,9 +31,13 @@ public class AuthenticationResource {
     }
 
     @PostMapping("/signin-with-google")
-    public ResponseEntity<?> signInWithGoogle(@RequestBody SigninGoogleRequest request) {
-
+    public ResponseEntity<?> signInWithGoogle(@RequestBody SigninProviderRequest request) {
         return authenticationService.signinWithGoogle(request);
+    }
+
+    @PostMapping("/signin-with-facebook")
+    public ResponseEntity<?> signInWithFacebook(@RequestBody SigninProviderRequest request) {
+        return authenticationService.signinWithFacebook(request);
     }
 
     @PutMapping("/active/{username}")

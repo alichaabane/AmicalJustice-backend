@@ -20,6 +20,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.social.facebook.api.Facebook;
+import org.springframework.social.facebook.api.impl.FacebookTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -83,14 +85,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     @Override
-    public ResponseEntity<?> signinWithGoogle(SigninGoogleRequest request) {
-        System.out.println("request = "+ request);
-        GoogleIdToken.Payload payload = this.getGoogleData(request.getIdToken());
+    public ResponseEntity<?> signinWithGoogle(SigninProviderRequest request) {
+        System.out.println("request GOOGLE login = "+ request);
+        GoogleIdToken.Payload payload = this.getGoogleData(request.getToken());
         User user = this.userRepository.findUserByEmail(payload.getEmail()).orElse(null);
         if(user != null) {
             user.setSource(Source.GOOGLE);
             var userDTO = mapUserToUserDto(user);
             var jwt = jwtService.generateToken(user);
+            return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @Override
+    public ResponseEntity<?> signinWithFacebook(SigninProviderRequest request) {
+        System.out.println("request facebook login = "+ request);
+        org.springframework.social.facebook.api.User user = this.getFacebookData(request.getToken());
+        User userJustice = this.userRepository.findUserByEmail(user.getEmail()).orElse(null);
+        if(userJustice != null) {
+            userJustice.setSource(Source.FACEBOOK);
+            var userDTO = mapUserToUserDto(userJustice);
+            var jwt = jwtService.generateToken(userJustice);
             return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
         }
         return ResponseEntity.notFound().build();
@@ -119,24 +135,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
+    public org.springframework.social.facebook.api.User getFacebookData(String token) {
+        Facebook facebook = new FacebookTemplate(token);
+        final String[] fields = {"email", "name", "first_name", "last_name"};
+        return facebook.fetchObject("me", org.springframework.social.facebook.api.User.class, fields);
+    }
+
     public static void main(String[] args) {
-        NetHttpTransport transport = new NetHttpTransport();
-        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-                .setAudience(Collections.singletonList("205380603904-0gq49n2s2i0pbk0u1j93j8vh6v2v74iu.apps.googleusercontent.com"))
-                .build();
-
-        try {
-            GoogleIdToken googleIdToken = verifier.verify("eyJhbGciOiJSUzI1NiIsImtpZCI6ImU0YWRmYjQzNmI5ZTE5N2UyZTExMDZhZjJjODQyMjg0ZTQ5ODZhZmYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIyMDUzODA2MDM5MDQtMGdxNDluMnMyaTBwYmswdTFqOTNqOHZoNnYydjc0aXUuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiIyMDUzODA2MDM5MDQtMGdxNDluMnMyaTBwYmswdTFqOTNqOHZoNnYydjc0aXUuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTAxMzI0NDgwNjE1MzI2OTA3NTAiLCJlbWFpbCI6ImFsaWNoYWFiYW5lOThAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5iZiI6MTcwMjIxNDg4NSwibmFtZSI6IkFsaSBDaGFhYmFuZSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NKX0Fwa05fZGl2MlA4RzlSXzhqWmNvUk5Rb1ZsOGJQV3hqREY4bmR0TnFNZmM9czk2LWMiLCJnaXZlbl9uYW1lIjoiQWxpIiwiZmFtaWx5X25hbWUiOiJDaGFhYmFuZSIsImxvY2FsZSI6ImZyIiwiaWF0IjoxNzAyMjE1MTg1LCJleHAiOjE3MDIyMTg3ODUsImp0aSI6ImViYjY3ODE2Njc1ZTEyZDE3NDQwNGZkZmMwMjRmYzc2NTFlMWU0MDIifQ.UB9OI-t00hMYU8OGqTb6eGfEJxZ468VxxcXo7sTMIh_CSjsQNu2BtApLUyq8JS9-DsoeTkNm2NrYuktnMXm-1FzDmXVS5KcK5E1irWt-ASFc2pZYUJOnBbL-ta2iAotvjkVUoHINlitUFT5jvY1VS-y1TkvK0NXJ2_FbuJAhH5f3RCvH6NwBaT29Bjl9kapkQCFHoEHXM-S39K9AuctqSHhDAY5d2O_8RStiO78hubOeH4ylmbvLmOuELADH3fA5SHrOBIGqRroxGpP75TEm4i6HCghpCk8zFzqjtvRs7n0IuXX-j4PtmIVFEodbr6PDrRcXeTyg2rchtNC-dvvBAA");
-            if (googleIdToken != null) {
-                System.out.println(googleIdToken.getPayload());
-            }
-        } catch (GeneralSecurityException | IOException e) {
-            e.printStackTrace(); // Logging the exception for debugging purposes
-            // Handle the exception according to your application's requirements
-        }
-        System.out.println("null");
     }
 
 

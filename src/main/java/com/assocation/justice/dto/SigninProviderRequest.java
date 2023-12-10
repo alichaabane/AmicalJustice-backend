@@ -1,6 +1,5 @@
 package com.assocation.justice.dto;
 
-import com.assocation.justice.util.enumeration.Source;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SigninGoogleRequest {
+public class SigninProviderRequest {
     private String token;
-    private String idToken;
-    private Source source;
 }
