@@ -1,6 +1,7 @@
 package com.assocation.justice.entity;
 
 import com.assocation.justice.util.enumeration.Role;
+import com.assocation.justice.util.enumeration.Source;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,6 +27,7 @@ public class User implements UserDetails {
     private String firstName;
     private String lastName;
     private String username;
+    private String email;
     private String password;
     @Column(columnDefinition = "boolean default false")
     private boolean confirmed;
@@ -35,6 +37,10 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private Source source = Source.LOGIN; // Default to LOGIN if not specified
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

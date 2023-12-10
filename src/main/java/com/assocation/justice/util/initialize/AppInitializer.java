@@ -11,6 +11,7 @@ import com.assocation.justice.service.impl.ActualiteServiceImpl;
 import com.assocation.justice.util.enumeration.CategoryResponsable;
 import com.assocation.justice.util.enumeration.Region;
 import com.assocation.justice.util.enumeration.Role;
+import com.assocation.justice.util.enumeration.Source;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +43,10 @@ public class AppInitializer implements CommandLineRunner {
         if (authenticationService.getAllUsers().isEmpty()) {
             logger.info("No User found. creating some users");
             List<RegionResponsableDTO> regionResponsableDTOList = regionResponsableService.getAllRegionResponsableByRegion("قفصة");
-            SignUpRequest user = new SignUpRequest(null,"Ramzi", "Bessadi", "ramzibessadi2023", "ramzi2023_",
-                    regionResponsableDTOList.get(0).getId() != null  ? regionResponsableDTOList.get(0).getId() : null, true, Role.SUPER_ADMIN);
+            SignUpRequest user = new SignUpRequest(null,"Ramzi", "Bessadi",
+                    "ramzibessadi2023", "ramzibessadi@yahoo.com", "ramzi2023_",
+                    regionResponsableDTOList.get(0).getId() != null  ? regionResponsableDTOList.get(0).getId() : null, true, Role.SUPER_ADMIN
+            , Source.LOGIN);
             authenticationService.signup(user);
             logger.info("User initialized and created successfully");
         }

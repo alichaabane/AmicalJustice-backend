@@ -9,8 +9,23 @@ token:
     key: 413F4428472B4B6250655368566D5970337336763979244226452948404D6351
 
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: 205380603904-1dd09q8040nl171vtm1tjs6dnp0vvf6c.apps.googleusercontent.com
+            client-secret: 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
+            scope: openid,email,profile
+
+          github:
+            clientId: Iv1.0a5ecda392c95673
+            client-secret: a884b7c9e70822d09dddd45f7e3da33104fdb7d7
+            scope: login
+
+
   datasource:
-    driverClassName: com.mysql.jdbc.Driver
+    driverClassName: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/justice
     username: root
     password:
@@ -34,10 +49,10 @@ app:
   magazine:
     dir: src/main/resources/static/magazines
 
-  web:
+web:
     resources:
       static-locations: classpath:/static/,classpath:/uploads/,classpath:/conferences/,classpath:/recherches/,classpath:/magazines/
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+    servlet:
+      multipart:
+        max-file-size: 10MB
+        max-request-size: 10MB

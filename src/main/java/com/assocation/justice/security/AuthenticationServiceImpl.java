@@ -7,6 +7,7 @@ import com.assocation.justice.dto.UserDTO;
 import com.assocation.justice.entity.User;
 import com.assocation.justice.repository.UserRepository;
 import com.assocation.justice.util.enumeration.Role;
+import com.assocation.justice.util.enumeration.Source;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,21 +57,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public ResponseEntity<?> signin(SigninRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-        var user = userRepository.findUserByUsername(request.getUsername()).orElse(null);
+        if(request.getSource().equals(Source.LOGIN)) {
+            var user = userRepository.findUserByUsername(request.getUsername()).orElse(null);
 
-        if(user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("USER NOT EXIST");
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("USER NOT EXIST");
+            }
+
+            if (!user.isConfirmed() && !user.getRole().equals(Role.SUPER_ADMIN)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("USER NOT CONFIRMED");
+            }
+
+            var userDTO = mapUserToUserDto(user);
+            var jwt = jwtService.generateToken(user);
+            return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
+        } else {
+            var user = userRepository.findUserByEmail(request.getEmail()).orElse(null);
+            var userDTO = mapUserToUserDto(user);
+            var jwt = jwtService.generateToken(user);
+            return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
         }
-
-        if (!user.isConfirmed() && !user.getRole().equals(Role.SUPER_ADMIN)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("USER NOT CONFIRMED");
-        }
-
-        var userDTO = mapUserToUserDto(user);
-        var jwt = jwtService.generateToken(user);
-        return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
     }
 
     @Override
@@ -82,6 +90,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public UserDTO getUserById(Long id) {
         Optional<User> user = this.userRepository.findById(id);
+        return user.map(this::mapUserToUserDto).orElse(null);
+    }
+    @Override
+    public UserDTO getUserByEmail(String email) {
+        Optional<User> user = this.userRepository.findUserByEmail(email);
         return user.map(this::mapUserToUserDto).orElse(null);
     }
 
@@ -102,6 +115,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(user != null) {
             user.setLastName(signUpRequest.getLastName());
             user.setFirstName(signUpRequest.getFirstName());
+            if(signUpRequest.getEmail() != null) {
+                user.setEmail(signUpRequest.getEmail());
+            }
+            if(!signUpRequest.getSource().equals(Source.LOGIN)) {
+                user.setSource(signUpRequest.getSource());
+            } else {
+                user.setSource(Source.LOGIN);
+            }
             if(signUpRequest.getPassword() != null) {
                 user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
             }
@@ -121,8 +142,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public UserDTO getCurrentUser(Authentication authentication) {
-        if (authentication != null && authentication.getPrincipal() instanceof User) {
-            User user = (User) authentication.getPrincipal();
+        if (authentication != null && authentication.getPrincipal() instanceof User user) {
             return mapUserToUserDto(user);
         }
         return  null;
@@ -136,6 +156,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         userDTO.setConfirmed(user.isConfirmed());
         if(user.getUsername()!= null) {
             userDTO.setUsername(user.getUsername());
+        }
+        if(user.getEmail()!= null) {
+            userDTO.setEmail(user.getEmail());
         }
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());

@@ -19,5 +19,6 @@ public interface AuthenticationService {
 
     ResponseEntity<?> updateUser(SignUpRequest signUpRequest);
     UserDTO getUserById(Long id);
+     UserDTO getUserByEmail(String email) ;
     void deleteUser(Long id);
 }
