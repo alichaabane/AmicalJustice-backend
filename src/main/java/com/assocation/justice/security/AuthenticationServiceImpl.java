@@ -9,7 +9,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +114,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public GoogleIdToken.Payload getGoogleData(String idToken) {
         NetHttpTransport transport = new NetHttpTransport();
-        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+        JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
                 .setAudience(Collections.singletonList(clientGoogleId))
@@ -137,14 +137,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public org.springframework.social.facebook.api.User getFacebookData(String token) {
         Facebook facebook = new FacebookTemplate(token);
-        final String[] fields = {"email", "name", "first_name", "last_name"};
+        final String[] fields = { "email", "name", "first_name", "last_name"};
         return facebook.fetchObject("me", org.springframework.social.facebook.api.User.class, fields);
     }
-
-    public static void main(String[] args) {
-
-    }
-
 
     @Override
     public List<UserDTO> getAllUsers() {
