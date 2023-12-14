@@ -43,7 +43,7 @@ public class AppInitializer implements CommandLineRunner {
         if (authenticationService.getAllUsers().isEmpty()) {
             logger.info("No User found. creating some users");
             List<RegionResponsableDTO> regionResponsableDTOList = regionResponsableService.getAllRegionResponsableByRegion("قفصة");
-            SignUpRequest user = new SignUpRequest(null,"Ramzi", "Bessadi",
+            SignUpRequest user = new SignUpRequest(null,"رمزي", "بالسعدي",
                     "ramzibessadi2023", "ramzibessadi@yahoo.com", "ramzi2023_",
                     regionResponsableDTOList.get(0).getId() != null  ? regionResponsableDTOList.get(0).getId() : null, true, Role.SUPER_ADMIN
             , Source.LOGIN);
