@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthenticationResource {
     private final AuthenticationService authenticationService;
@@ -28,16 +28,6 @@ public class AuthenticationResource {
     @PostMapping("/signin")
     public ResponseEntity<?> signin(@RequestBody SigninRequest request) {
         return authenticationService.signin(request);
-    }
-
-    @PostMapping("/signin-with-google")
-    public ResponseEntity<?> signInWithGoogle(@RequestBody SigninProviderRequest request) {
-        return authenticationService.signinWithGoogle(request);
-    }
-
-    @PostMapping("/signin-with-facebook")
-    public ResponseEntity<?> signInWithFacebook(@RequestBody SigninProviderRequest request) {
-        return authenticationService.signinWithFacebook(request);
     }
 
     @PutMapping("/active/{username}")

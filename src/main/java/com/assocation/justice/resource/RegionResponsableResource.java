@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api/regionsResponsable")
+@RequestMapping("/api/v1/regionsResponsable")
 public class RegionResponsableResource {
 
     private final RegionResponsableService regionResponsableService;

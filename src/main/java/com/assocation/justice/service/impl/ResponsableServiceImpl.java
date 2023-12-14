@@ -83,9 +83,9 @@ public class ResponsableServiceImpl implements ResponsableService {
                 existingResponsable.setCategoryResponsable(responsableDTO.getCategoryResponsable());
 
                 // Now handle the regionResponsable reference
-                Region regionResponsableCity = responsableDTO.getRegionResponsableCity();
-                if (regionResponsableCity != null) {
-                    RegionResponsable regionResponsable = regionResponsableRepository.findByRegion(regionResponsableCity);
+                String regionResponsableName = responsableDTO.getRegionResponsableName();
+                if (regionResponsableName != null) {
+                    RegionResponsable regionResponsable = regionResponsableRepository.findByNom(regionResponsableName);
                     if (regionResponsable != null) {
                         existingResponsable.setRegionResponsable(regionResponsable);
                     }  // Handle the case when the specified RegionResponsable doesn't exist

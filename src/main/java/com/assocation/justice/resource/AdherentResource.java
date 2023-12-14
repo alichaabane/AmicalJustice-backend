@@ -15,7 +15,7 @@ import java.util.Map;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api/adherents")
+@RequestMapping("/api/v1/adherents")
 @RequiredArgsConstructor
 public class AdherentResource {
 

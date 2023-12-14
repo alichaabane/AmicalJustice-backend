@@ -25,7 +25,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api/conferences")
+@RequestMapping("/api/v1/conferences")
 public class ConferenceResource {
     private final ConferenceService conferenceService;
 

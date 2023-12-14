@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api/responsables")
+@RequestMapping("/api/v1/responsables")
 public class ResponsableResource {
         private final ResponsableService responsableService;
 

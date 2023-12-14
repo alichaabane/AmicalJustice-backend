@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api/actualites")
+@RequestMapping("/api/v1/actualites")
 public class ActualitesResource {
     private final ActualiteService actualiteService;
 
@@ -42,26 +42,20 @@ public class ActualitesResource {
         return ResponseEntity.ok(imageDTOs);
     }
 
+    //TODO
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> getImage(@PathVariable String filename) throws IOException {
         Resource resource = new ClassPathResource("static/uploads/" + filename);
-        String mediaTypeString = determineMediaType(filename);
+
+        if (!resource.exists()) {
+            // Handle the case where the resource (image) is not found
+            return ResponseEntity.notFound().build();
+        }
 
         return ResponseEntity.ok()
-                .contentLength(resource.contentLength())
-                .contentType(MediaType.parseMediaType(mediaTypeString) ) // Adjust content type based on your image type
+                .contentType(MediaType.IMAGE_GIF) // Set a default media type to handle images
                 .body(resource);
     }
-
-    private String determineMediaType(String filename) {
-        if (filename.toLowerCase().endsWith(".webp")) {
-            return "image/webp";
-        } else {
-            // Default to JPEG if the format is not recognized
-            return "image/jpeg";
-        }
-    }
-
 
     @PostMapping("/upload")
     public ActualiteDTO uploadImage(@RequestParam("file") MultipartFile file,
