@@ -1,6 +1,7 @@
 package com.assocation.justice.security;
 
 import com.assocation.justice.dto.*;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
@@ -15,6 +16,7 @@ public interface AuthenticationService {
 
     ResponseEntity<UserDTO> changeUserState(String username);
     List<UserDTO> getAllUsers();
+    PageRequestData<UserDTO> getAllUsersPaginated(PageRequest pageRequest);
     UserDTO getCurrentUser(Authentication authentication);
 
     ResponseEntity<?> updateUser(SignUpRequest signUpRequest);

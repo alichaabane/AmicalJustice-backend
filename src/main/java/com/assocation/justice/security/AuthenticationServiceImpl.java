@@ -1,6 +1,7 @@
 package com.assocation.justice.security;
 
 import com.assocation.justice.dto.*;
+import com.assocation.justice.entity.RegionResponsable;
 import com.assocation.justice.entity.User;
 import com.assocation.justice.repository.UserRepository;
 import com.assocation.justice.util.enumeration.Role;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -146,6 +149,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         List<User> users = userRepository.findAll();
         return users.stream().map(this::mapUserToUserDto).collect(Collectors.toList());
     }
+
+    @Override
+    public PageRequestData<UserDTO> getAllUsersPaginated(PageRequest pageRequest) {
+        Page<User> userPage = userRepository.findAll(pageRequest);
+        PageRequestData<UserDTO> customPageResponse = new PageRequestData<>();
+        customPageResponse.setContent(userPage.map(this::mapUserToUserDto).getContent());
+        customPageResponse.setTotalPages(userPage.getTotalPages());
+        customPageResponse.setTotalElements(userPage.getTotalElements());
+        customPageResponse.setNumber(userPage.getNumber());
+        customPageResponse.setSize(userPage.getSize());
+        logger.info("Fetching All users of Page N° " + pageRequest.getPageNumber());
+        return customPageResponse;    }
 
     @Override
     public UserDTO getUserById(Long id) {

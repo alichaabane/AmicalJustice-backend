@@ -1,10 +1,14 @@
 package com.assocation.justice.resource;
 
 import com.assocation.justice.dto.ActualiteDTO;
+import com.assocation.justice.dto.PageRequestData;
+import com.assocation.justice.dto.RegionResponsableDTO2;
 import com.assocation.justice.service.ActualiteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @CrossOrigin("*")
@@ -41,6 +46,19 @@ public class ActualitesResource {
         List<ActualiteDTO> imageDTOs = actualiteService.getAllImages();
         return ResponseEntity.ok(imageDTOs);
     }
+    @GetMapping("/paginated")
+    public ResponseEntity<PageRequestData<ActualiteDTO>> getAllImagesPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        PageRequestData<ActualiteDTO> actualiteDTOPageRequestData = actualiteService.getAllImagesPaginated(pageRequest);
+        if(actualiteDTOPageRequestData != null){
+            return new ResponseEntity<>(actualiteDTOPageRequestData, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
 
     //TODO
     @GetMapping("/{filename:.+}")
@@ -53,7 +71,7 @@ public class ActualitesResource {
         }
 
         return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_GIF) // Set a default media type to handle images
+                .contentType(MediaType.IMAGE_JPEG) // Set a default media type to handle images
                 .body(resource);
     }
 
@@ -73,11 +91,8 @@ public class ActualitesResource {
     @PutMapping("/active/{id}")
     public ResponseEntity<ActualiteDTO> toggleVisibleState(@PathVariable Long id) {
         ResponseEntity<ActualiteDTO> responseEntity = actualiteService.changeImageVisibleState(id);
-        if (responseEntity != null) {
-            return responseEntity; // Return the response from changeImageVisibleState
-        } else {
-            return ResponseEntity.notFound().build(); // Return a 404 response if changeImageVisibleState returns null
-        }
+        // Return a 404 response if changeImageVisibleState returns null
+        return Objects.requireNonNullElseGet(responseEntity, () -> ResponseEntity.notFound().build()); // Return the response from changeImageVisibleState
     }
 
 

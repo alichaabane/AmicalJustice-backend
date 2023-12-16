@@ -1,7 +1,10 @@
 package com.assocation.justice.service.impl;
 
 import com.assocation.justice.dto.AdherentDTO;
+import com.assocation.justice.dto.ConferenceDTO;
+import com.assocation.justice.dto.PageRequestData;
 import com.assocation.justice.entity.Adherent;
+import com.assocation.justice.entity.Conference;
 import com.assocation.justice.entity.RegionResponsable;
 import com.assocation.justice.repository.AdherentRepository;
 import com.assocation.justice.repository.RegionResponsableRepository;
@@ -14,9 +17,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,6 +44,7 @@ public class AdherentServiceImpl implements AdherentService {
     @Override
     public AdherentDTO createAdherent(AdherentDTO adherentDTO) {
         Adherent adherent = mapToAdherent(adherentDTO);
+        adherent.setCreatedAt(LocalDateTime.now());
         // Add logic for saving the adherent to the database
         // Assuming adherentRepository is the repository for Adherent entities
         if(adherent != null) {
@@ -65,6 +72,19 @@ public class AdherentServiceImpl implements AdherentService {
     }
 
     @Override
+    public PageRequestData<AdherentDTO>  getAllAdherentsByPage(PageRequest pageRequest) {
+        Page<Adherent> adherentPage = adherentRepository.findAll(pageRequest);
+        PageRequestData<AdherentDTO> customPageResponse = new PageRequestData<>();
+        customPageResponse.setContent(adherentPage.map(this::mapToAdherentDTO).getContent());
+        customPageResponse.setTotalPages(adherentPage.getTotalPages());
+        customPageResponse.setTotalElements(adherentPage.getTotalElements());
+        customPageResponse.setNumber(adherentPage.getNumber());
+        customPageResponse.setSize(adherentPage.getSize());
+        logger.info("Fetching All Adherents of Page N° " + pageRequest.getPageNumber());
+        return customPageResponse;
+    }
+
+    @Override
     public List<AdherentDTO> getAllAdherents() {
         List<Adherent> adherents = adherentRepository.findAll();
         logger.info("Fetching All Adherents successfully");
@@ -77,6 +97,7 @@ public class AdherentServiceImpl implements AdherentService {
         if (existingAdherent != null) {
             logger.info("updating Adherent with CIN = " + cin.toString().substring(4) + " with success");
             Adherent updatedAdherent = mapToAdherent(adherentDTO);
+            updatedAdherent.setUpdatedAt(LocalDateTime.now());
             updatedAdherent.setCin(existingAdherent.getCin());
             // Add necessary logic for updating the adherent
             updatedAdherent = adherentRepository.save(updatedAdherent);
@@ -103,65 +124,71 @@ public class AdherentServiceImpl implements AdherentService {
 
     @Override
     public Workbook exportAdherentListToExcel(List<AdherentDTO> adherents) {
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Adherents");
+        try {
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Adherents");
 
-        // Add headers
-        Row headerRow = sheet.createRow(0);
-        headerRow.createCell(0).setCellValue("بطاقة التعريف الوطنية");
-        headerRow.createCell(1).setCellValue("الأسم و اللقب");
-        headerRow.createCell(2).setCellValue("تاريخ الميلاد");
-        headerRow.createCell(3).setCellValue("مكان الميلاد");
-        headerRow.createCell(4).setCellValue("الرقم الوطني");
-        headerRow.createCell(5).setCellValue("رقم التسجيل");
-        headerRow.createCell(6).setCellValue("الوظيفة");
-        headerRow.createCell(7).setCellValue("المقر المنخرط به ");
-        headerRow.createCell(8).setCellValue("الحالة العائلية");
-        headerRow.createCell(9).setCellValue("مستوى التعليم للابن الأول"); //TODO
-        headerRow.createCell(10).setCellValue("مستوى التعليم للابن الثاني");
-        headerRow.createCell(11).setCellValue("مستوى التعليم للابن الثالث");
-        headerRow.createCell(12).setCellValue("مستوى التعليم للابن الرابع");
-        headerRow.createCell(13).setCellValue("مستوى التعليم للابن الخامس");
-        headerRow.createCell(14).setCellValue("مستوى التعليم للابن السادس");
-        // Add more headers as needed
+            // Add headers
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("بطاقة التعريف الوطنية");
+            headerRow.createCell(1).setCellValue("الأسم و اللقب");
+            headerRow.createCell(2).setCellValue("تاريخ الميلاد");
+            headerRow.createCell(3).setCellValue("مكان الميلاد");
+            headerRow.createCell(4).setCellValue("الرقم الوطني");
+            headerRow.createCell(5).setCellValue("رقم التسجيل");
+            headerRow.createCell(6).setCellValue("الوظيفة");
+            headerRow.createCell(7).setCellValue("المقر المنخرط به ");
+            headerRow.createCell(8).setCellValue("الحالة العائلية");
+            headerRow.createCell(9).setCellValue("مستوى التعليم للابن الأول"); //TODO
+            headerRow.createCell(10).setCellValue("مستوى التعليم للابن الثاني");
+            headerRow.createCell(11).setCellValue("مستوى التعليم للابن الثالث");
+            headerRow.createCell(12).setCellValue("مستوى التعليم للابن الرابع");
+            headerRow.createCell(13).setCellValue("مستوى التعليم للابن الخامس");
+            headerRow.createCell(14).setCellValue("مستوى التعليم للابن السادس");
+            // Add more headers as needed
 
-        // Add data to the Excel file
-        int rowNum = 1;
-        for (AdherentDTO adherent : adherents) {
-            Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(adherent.getCin());
-            row.createCell(1).setCellValue(adherent.getNom());
-            row.createCell(2).setCellValue(adherent.getBirthday());
-            row.createCell(3).setCellValue(adherent.getBirthdayPlace());
-            row.createCell(4).setCellValue(adherent.getMatricule());
-            row.createCell(5).setCellValue(adherent.getNumeroInscription());
-            row.createCell(6).setCellValue(adherent.getAdherentJob());
-            row.createCell(7).setCellValue(adherent.getRegionResponsibleId());
-            if (adherent.getRegionResponsibleId() != null) {
-                Optional<RegionResponsable> regionResponsable = regionResponsableRepository.findById(adherent.getRegionResponsibleId());
-                if(regionResponsable.isPresent()) {
-                   String nomRegion = regionResponsable.get().getNom();
-                    row.createCell(7).setCellValue(nomRegion);
-                } else {
-                    row.createCell(7).setCellValue("X");
+            // Add data to the Excel file
+            int rowNum = 1;
+            for (AdherentDTO adherent : adherents) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(adherent.getCin());
+                row.createCell(1).setCellValue(adherent.getNom());
+                row.createCell(2).setCellValue(adherent.getBirthday());
+                row.createCell(3).setCellValue(adherent.getBirthdayPlace());
+                row.createCell(4).setCellValue(adherent.getMatricule());
+                row.createCell(5).setCellValue(adherent.getNumeroInscription());
+                row.createCell(6).setCellValue(adherent.getAdherentJob());
+                row.createCell(7).setCellValue(adherent.getRegionResponsibleId());
+                if (adherent.getRegionResponsibleId() != null) {
+                    Optional<RegionResponsable> regionResponsable = regionResponsableRepository.findById(adherent.getRegionResponsibleId());
+                    if (regionResponsable.isPresent()) {
+                        String nomRegion = regionResponsable.get().getNom();
+                        row.createCell(7).setCellValue(nomRegion);
+                    } else {
+                        row.createCell(7).setCellValue("X");
+                    }
                 }
+                row.createCell(8).setCellValue(adherent.getSituationFamiliale());
+                row.createCell(9).setCellValue(adherent.getChild1EducationLevel());
+                row.createCell(10).setCellValue(adherent.getChild2EducationLevel());
+                row.createCell(11).setCellValue(adherent.getChild3EducationLevel());
+                row.createCell(12).setCellValue(adherent.getChild4EducationLevel());
+                row.createCell(13).setCellValue(adherent.getChild5EducationLevel());
+                row.createCell(14).setCellValue(adherent.getChild6EducationLevel());
+                // Add more data fields as needed
             }
-            row.createCell(8).setCellValue(adherent.getSituationFamiliale());
-            row.createCell(9).setCellValue(adherent.getChild1EducationLevel());
-            row.createCell(10).setCellValue(adherent.getChild2EducationLevel());
-            row.createCell(11).setCellValue(adherent.getChild3EducationLevel());
-            row.createCell(12).setCellValue(adherent.getChild4EducationLevel());
-            row.createCell(13).setCellValue(adherent.getChild5EducationLevel());
-            row.createCell(14).setCellValue(adherent.getChild6EducationLevel());
-            // Add more data fields as needed
-        }
 
-        // Adjust column width
-        for (int i = 0; i < 15; i++) {
-            sheet.autoSizeColumn(i);
-        }
+            // Adjust column width
+            for (int i = 0; i < 15; i++) {
+                sheet.autoSizeColumn(i);
+            }
 
-        return workbook;
+            return workbook;
+        }
+        catch (Exception e) {
+            logger.error("Error in parsing excel file - adherent : " + e);
+            return null;
+        }
     }
 
     public AdherentDTO mapToAdherentDTO(Adherent adherent) {

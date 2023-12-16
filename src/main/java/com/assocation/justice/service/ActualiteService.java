@@ -1,6 +1,8 @@
 package com.assocation.justice.service;
 
 import com.assocation.justice.dto.ActualiteDTO;
+import com.assocation.justice.dto.PageRequestData;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,6 +13,7 @@ public interface ActualiteService {
     ActualiteDTO getActualiteById(Long id);
 
     List<ActualiteDTO> getAllImages();
+    PageRequestData<ActualiteDTO> getAllImagesPaginated(PageRequest pageRequest);
 
     ActualiteDTO updateImage(Long imageId, MultipartFile file, ActualiteDTO updatedImageDTO);
 

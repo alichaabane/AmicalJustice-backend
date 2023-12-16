@@ -1,9 +1,12 @@
 package com.assocation.justice.resource;
 
+import com.assocation.justice.dto.PageRequestData;
 import com.assocation.justice.dto.RegionResponsableDTO;
 import com.assocation.justice.dto.RegionResponsableDTO2;
+import com.assocation.justice.dto.ResponsableDTO;
 import com.assocation.justice.service.RegionResponsableService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +28,24 @@ public class RegionResponsableResource {
     @GetMapping("")
     public ResponseEntity<List<RegionResponsableDTO2>> getRegionResponsables() {
         List<RegionResponsableDTO2> regionResponsables = regionResponsableService.getAllRegionResponsables();
+        if (regionResponsables != null) {
+            return new ResponseEntity<>(regionResponsables, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/paginated")
+    public ResponseEntity<PageRequestData<RegionResponsableDTO2>> getRegionResponsablesPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        PageRequestData<RegionResponsableDTO2> regionResponsables = regionResponsableService.getAllRegionResponsablesPaginated(pageRequest);
         if(regionResponsables != null){
             return new ResponseEntity<>(regionResponsables, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
 

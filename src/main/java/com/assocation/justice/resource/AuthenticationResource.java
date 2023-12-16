@@ -1,11 +1,9 @@
 package com.assocation.justice.resource;
 
-import com.assocation.justice.dto.SignUpRequest;
-import com.assocation.justice.dto.SigninProviderRequest;
-import com.assocation.justice.dto.SigninRequest;
-import com.assocation.justice.dto.UserDTO;
+import com.assocation.justice.dto.*;
 import com.assocation.justice.security.AuthenticationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -45,6 +43,20 @@ public class AuthenticationResource {
         } else {
             return ResponseEntity.notFound().build(); // Or handle the case when no users are found
         }
+    }
+
+    @GetMapping("/paginated")
+    public ResponseEntity<PageRequestData<UserDTO>> getAllUsersPaginated(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+            PageRequest pageRequest = PageRequest.of(page, size);
+            PageRequestData<UserDTO> users = authenticationService.getAllUsersPaginated(pageRequest);
+            if(users != null){
+                return new ResponseEntity<>(users, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
     }
 
     @PutMapping("/update")

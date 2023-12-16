@@ -1,8 +1,11 @@
 package com.assocation.justice.resource;
 
+import com.assocation.justice.dto.NationaleResponsableDTO;
+import com.assocation.justice.dto.PageRequestData;
 import com.assocation.justice.dto.ResponsableDTO;
 import com.assocation.justice.service.ResponsableService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,10 +33,24 @@ public class ResponsableResource {
             }
         }
 
-        @GetMapping("")
-        public ResponseEntity<List<ResponsableDTO>> getResponsables() {
-            List<ResponsableDTO> responsableDTOS = responsableService.getAllResponsables();
-            return ResponseEntity.ok(responsableDTOS);
+    @GetMapping("")
+    public ResponseEntity<List<ResponsableDTO>> getResponsables() {
+        List<ResponsableDTO> responsableDTOS = responsableService.getAllResponsables();
+        return ResponseEntity.ok(responsableDTOS);
+    }
+
+        @GetMapping("/paginated")
+        public ResponseEntity<PageRequestData<ResponsableDTO>> getResponsablesPaginated(
+                @RequestParam(defaultValue = "0") int page,
+                @RequestParam(defaultValue = "10") int size
+        ) {
+            PageRequest pageRequest = PageRequest.of(page, size);
+            PageRequestData<ResponsableDTO> responsables = responsableService.getAllResponsablesPaginated(pageRequest);
+            if(responsables != null){
+                return new ResponseEntity<>(responsables, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
         }
 
 

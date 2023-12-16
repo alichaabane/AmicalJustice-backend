@@ -1,10 +1,13 @@
 package com.assocation.justice.resource;
 
 import com.assocation.justice.dto.AdherentDTO;
+import com.assocation.justice.dto.ConferenceDTO;
+import com.assocation.justice.dto.PageRequestData;
 import com.assocation.justice.service.AdherentService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,19 +45,28 @@ public class AdherentResource {
     }
 
     @GetMapping("/export-xlsx")
-    public void exportAdherentList(HttpServletResponse response) throws IOException {
+    public void exportAdherentList(HttpServletResponse response) {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=adherents.xlsx");
 
         List<AdherentDTO> adherents = adherentService.getAllAdherents(); // Replace with your data retrieval logic
-        Workbook workbook = adherentService.exportAdherentListToExcel(adherents);
-        workbook.write(response.getOutputStream());
+        try {
+            Workbook workbook = adherentService.exportAdherentListToExcel(adherents);
+            workbook.write(response.getOutputStream());
+        }
+        catch (Exception e) {
+            System.out.println("Error in parsing excel file - adherent : " + e);
+        }
     }
 
     @GetMapping
-    public ResponseEntity<List<AdherentDTO>> getAllAdherents() {
-        List<AdherentDTO> adherents = adherentService.getAllAdherents();
-        return new ResponseEntity<>(adherents, HttpStatus.OK);
+    public ResponseEntity<PageRequestData<AdherentDTO>> getAllAdherents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        PageRequestData<AdherentDTO> adherentsPage = adherentService.getAllAdherentsByPage(pageRequest);
+        return ResponseEntity.ok(adherentsPage);
     }
 
     @PutMapping("/{cin}")

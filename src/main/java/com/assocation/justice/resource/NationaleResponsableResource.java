@@ -1,8 +1,11 @@
 package com.assocation.justice.resource;
 
+import com.assocation.justice.dto.AdherentDTO;
 import com.assocation.justice.dto.NationaleResponsableDTO;
+import com.assocation.justice.dto.PageRequestData;
 import com.assocation.justice.service.NationaleResponsableService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +24,7 @@ public class NationaleResponsableResource {
         }
 
         @GetMapping("/{id}")
-        public ResponseEntity<NationaleResponsableDTO> getResponsableById(@PathVariable Long id) {
+        public ResponseEntity<NationaleResponsableDTO> getNationaleResponsableById(@PathVariable Long id) {
             NationaleResponsableDTO responsableDTO = nationaleResponsableService.getNationaleResponsableById(id);
             if (responsableDTO != null) {
                 return ResponseEntity.ok(responsableDTO);
@@ -31,20 +34,24 @@ public class NationaleResponsableResource {
         }
 
         @GetMapping("")
-        public ResponseEntity<List<NationaleResponsableDTO>> getResponsables() {
-            List<NationaleResponsableDTO> responsableDTOS = nationaleResponsableService.getAllNationaleResponsables();
-            return ResponseEntity.ok(responsableDTOS);
+        public ResponseEntity<PageRequestData<NationaleResponsableDTO>> getNationaleResponsables(
+                @RequestParam(defaultValue = "0") int page,
+                @RequestParam(defaultValue = "10") int size
+        ) {
+            PageRequest pageRequest = PageRequest.of(page, size);
+            PageRequestData<NationaleResponsableDTO> nationaleResponsables = nationaleResponsableService.getAllNationaleResponsables(pageRequest);
+            return ResponseEntity.ok(nationaleResponsables);
         }
 
 
         @PostMapping("")
-        public ResponseEntity<NationaleResponsableDTO> createResponsable(@RequestBody NationaleResponsableDTO responsableDTO) {
+        public ResponseEntity<NationaleResponsableDTO> createNationaleResponsable(@RequestBody NationaleResponsableDTO responsableDTO) {
             NationaleResponsableDTO createdResponsableDTO = nationaleResponsableService.createNationaleResponsable(responsableDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdResponsableDTO);
         }
 
         @PutMapping("/{id}")
-        public ResponseEntity<NationaleResponsableDTO> updateResponsable(@PathVariable Long id, @RequestBody NationaleResponsableDTO responsableDTO) {
+        public ResponseEntity<NationaleResponsableDTO> updateNationaleResponsable(@PathVariable Long id, @RequestBody NationaleResponsableDTO responsableDTO) {
             NationaleResponsableDTO updatedResponsableDTO = nationaleResponsableService.updateNationaleResponsable(id, responsableDTO);
             if (updatedResponsableDTO != null) {
                 return ResponseEntity.ok(updatedResponsableDTO);
