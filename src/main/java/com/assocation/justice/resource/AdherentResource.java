@@ -60,7 +60,13 @@ public class AdherentResource {
     }
 
     @GetMapping
-    public ResponseEntity<PageRequestData<AdherentDTO>> getAllAdherents(
+    public ResponseEntity<List<AdherentDTO>> getAllAdherents() {
+        List<AdherentDTO> adherents = adherentService.getAllAdherents();
+        return new ResponseEntity<>(adherents, HttpStatus.OK);
+    }
+
+    @GetMapping("/paginated")
+    public ResponseEntity<PageRequestData<AdherentDTO>> getAllAdherentsPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {

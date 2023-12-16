@@ -44,7 +44,14 @@ public class NationaleResponsableServiceImpl implements NationaleResponsableServ
     }
 
     @Override
-    public PageRequestData<NationaleResponsableDTO> getAllNationaleResponsables(PageRequest pageRequest) {
+    public List<NationaleResponsableDTO> getAllNationaleResponsables() {
+        List<NationaleResponsable> nationaleResponsables = nationaleResponsableRepository.findAll();
+        logger.info("Fetching All nationale responsables successfully");
+        return nationaleResponsables.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public PageRequestData<NationaleResponsableDTO> getAllNationaleResponsablesPaginated(PageRequest pageRequest) {
         Page<NationaleResponsable> nationaleResponsablePage = nationaleResponsableRepository.findAll(pageRequest);
         PageRequestData<NationaleResponsableDTO> customPageResponse = new PageRequestData<>();
         customPageResponse.setContent(nationaleResponsablePage.map(this::mapToDTO).getContent());

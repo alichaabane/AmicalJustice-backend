@@ -14,7 +14,8 @@ public interface ConferenceService {
 
     ConferenceDTO getConferenceById(Long id);
 
-    PageRequestData<ConferenceDTO> getAllConferences(PageRequest pageRequest);
+    PageRequestData<ConferenceDTO> getAllConferencesPaginated(PageRequest pageRequest);
+    List<ConferenceDTO> getAllConferences();
 
     ConferenceDTO updateConference(Long conferenceId, MultipartFile file, ConferenceDTO updatedConferenceDTO);
 

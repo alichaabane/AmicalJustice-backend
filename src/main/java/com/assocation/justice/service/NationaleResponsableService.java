@@ -9,7 +9,8 @@ import java.util.List;
 public interface NationaleResponsableService {
     NationaleResponsableDTO createNationaleResponsable(NationaleResponsableDTO NationaleResponsableDTO);
     NationaleResponsableDTO getNationaleResponsableById(Long id);
-    PageRequestData<NationaleResponsableDTO> getAllNationaleResponsables(PageRequest pageRequest);
+    List<NationaleResponsableDTO> getAllNationaleResponsables();
+    PageRequestData<NationaleResponsableDTO> getAllNationaleResponsablesPaginated(PageRequest pageRequest);
     NationaleResponsableDTO updateNationaleResponsable(Long id, NationaleResponsableDTO NationaleResponsableDTO);
     void deleteNationaleResponsable(Long id);
 }
