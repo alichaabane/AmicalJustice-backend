@@ -1,0 +1,18 @@
+services:
+  justice-backend:
+    container_name: justice-backend
+    build:
+      context: .
+      args:
+        CONTAINER_PORT: ${CONTAINER_PORT}
+    image: justice-backend:v1
+    restart: unless-stopped
+    env_file:
+      - ${ENV_FILE}
+    expose:
+      - ${CONTAINER_PORT}
+    ports:
+      - ${CONTAINER_PORT}:${HOST_PORT}
+    volumes:
+      - ./src/main/resources/static:/app/src/main/resources/static
+

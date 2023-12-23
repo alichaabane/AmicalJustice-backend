@@ -1,14 +1,21 @@
 server:
-  port: 8081
+  port: ${CONTAINER_PORT:8081}
+
 application:
-  version: Amicale Justice
-spring-boot:
+  title: Amicale Justice
   version: 1.0.0
+
+
+  ############# JWT Auth Config #########
 token:
-  signing:
-    key: 413F4428472B4B6250655368566D5970337336763979244226452948404D6351
+    signing:
+      key: ${JWT_KEY}
 
 spring:
+  profiles:
+    active: ${ACTIVE_PROFILE:dev}
+
+############# Google Oauth2 Config #########
   security:
     oauth2:
       resource:
@@ -16,19 +23,25 @@ spring:
 
       resourceserver:
         jwt:
-          jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
-          issuer-uri: https://accounts.google.com
-          client-id: 205380603904-0gq49n2s2i0pbk0u1j93j8vh6v2v74iu.apps.googleusercontent.com
-          client-secret: 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
-          jws-algorithms: HS256
+          jwk-set-uri: ${OUATH2_JWK_URI}
+          issuer-uri: ${OAUTH2_ISSUER_URI}
+          client-id: ${OAUTH2_GOOGLE_CLIENT_ID}
+          client-secret: ${OAUTH2_GOOGLE_CLIENT_SECRET}
+          jws-algorithms: ${OAUTH_JWS_ALGORITHMS}
 
+  ############# Database Config #########
   datasource:
+    # CREATE USER 'root'@'host.docker.internal' IDENTIFIED BY '';
+    #GRANT ALL PRIVILEGES ON *.* TO 'root'@'host.docker.internal' WITH GRANT OPTION;
+    #FLUSH PRIVILEGES;
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/justice
-    username: root
-    password:
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
   jpa:
-    hibernate:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
       ddl-auto: update
       generate-ddl: true
       show-sql: true

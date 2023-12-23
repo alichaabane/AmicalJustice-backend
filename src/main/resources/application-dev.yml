@@ -1,0 +1,26 @@
+# Database
+MYSQL_HOST: 192.168.1.106
+MYSQL_PORT: 3306
+MYSQL_DATABASE: justice
+MYSQL_USERNAME: root
+MYSQL_PASSWORD: ''
+
+# Server Config
+CONTAINER_PORT: 8081
+ACTIVE_PROFILE: dev
+
+# Oauth2
+# JSON Web Key (JWK) Set. In OAuth2, JSON Web Keys are used for securely signing and validating tokens.
+OUATH2_JWK_URI: https://www.googleapis.com/oauth2/v3/certs
+# The issuer URI is used to identify the entity that issued the tokens. In this case, it's set to https://accounts.google.com,
+#which is the Google Accounts authentication service
+# It signifies that the tokens being used in your application are issued by Google's authentication service.
+OAUTH2_ISSUER_URI: https://accounts.google.com
+OAUTH2_GOOGLE_CLIENT_ID: 205380603904-0gq49n2s2i0pbk0u1j93j8vh6v2v74iu.apps.googleusercontent.com
+OAUTH2_GOOGLE_CLIENT_SECRET: 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
+#  This property represents the algorithms used for JSON Web Signature (JWS)
+# JWS is a method for securely signing JSON-encoded data
+OAUTH_JWS_ALGORITHMS: HS256
+
+# Jwt Secret key Config
+JWT_KEY: 413F4428472B4B6250655368566D5970337336763979244226452948404D6351
