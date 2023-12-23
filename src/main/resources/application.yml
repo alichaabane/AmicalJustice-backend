@@ -9,8 +9,21 @@ token:
     key: 413F4428472B4B6250655368566D5970337336763979244226452948404D6351
 
 spring:
+  security:
+    oauth2:
+      resource:
+        filter-order: 3
+
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+          issuer-uri: https://accounts.google.com
+          client-id: 205380603904-0gq49n2s2i0pbk0u1j93j8vh6v2v74iu.apps.googleusercontent.com
+          client-secret: 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
+          jws-algorithms: HS256
+
   datasource:
-    driverClassName: com.mysql.jdbc.Driver
+    driverClassName: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/justice
     username: root
     password:
@@ -34,10 +47,10 @@ app:
   magazine:
     dir: src/main/resources/static/magazines
 
-  web:
+web:
     resources:
       static-locations: classpath:/static/,classpath:/uploads/,classpath:/conferences/,classpath:/recherches/,classpath:/magazines/
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+    servlet:
+      multipart:
+        max-file-size: 10MB
+        max-request-size: 10MB

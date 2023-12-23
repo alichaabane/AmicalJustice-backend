@@ -102,7 +102,16 @@ public class ConferenceServiceImpl implements ConferenceService {
     }
 
     @Override
-    public PageRequestData<ConferenceDTO> getAllConferences(PageRequest pageRequest) {
+    public List<ConferenceDTO> getAllConferences() {
+        List<Conference> conferences = conferenceRepository.findAll();
+        List<ConferenceDTO> conferenceDTOS = conferences.stream()
+                .map(this::mapConferenceToDTO)
+                .collect(Collectors.toList());
+        return conferenceDTOS;
+    }
+
+    @Override
+    public PageRequestData<ConferenceDTO> getAllConferencesPaginated(PageRequest pageRequest) {
         logger.info("Conference list fetched successfully");
         Page<Conference> conferencePage = conferenceRepository.findAll(pageRequest);
         PageRequestData<ConferenceDTO> customPageResponse = new PageRequestData<>();

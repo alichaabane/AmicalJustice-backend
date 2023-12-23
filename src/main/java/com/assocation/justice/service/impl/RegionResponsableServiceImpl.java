@@ -1,5 +1,6 @@
 package com.assocation.justice.service.impl;
 
+import com.assocation.justice.dto.PageRequestData;
 import com.assocation.justice.dto.RegionResponsableDTO;
 import com.assocation.justice.dto.RegionResponsableDTO2;
 import com.assocation.justice.dto.ResponsableDTO;
@@ -11,6 +12,8 @@ import com.assocation.justice.util.enumeration.Region;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,6 +39,19 @@ public class RegionResponsableServiceImpl implements RegionResponsableService {
                 .collect(Collectors.toList());
         logger.info("Fetched all region responsables successfully.");
         return result;
+    }
+
+    @Override
+    public PageRequestData<RegionResponsableDTO2> getAllRegionResponsablesPaginated(PageRequest pageRequest) {
+        Page<RegionResponsable> regionResponsablePage = regionResponsableRepository.findAll(pageRequest);
+        PageRequestData<RegionResponsableDTO2> customPageResponse = new PageRequestData<>();
+        customPageResponse.setContent(regionResponsablePage.map(this::mapToRegionResponsableDTO2).getContent());
+        customPageResponse.setTotalPages(regionResponsablePage.getTotalPages());
+        customPageResponse.setTotalElements(regionResponsablePage.getTotalElements());
+        customPageResponse.setNumber(regionResponsablePage.getNumber());
+        customPageResponse.setSize(regionResponsablePage.getSize());
+        logger.info("Fetching All region responsables of Page N° " + pageRequest.getPageNumber());
+        return customPageResponse;
     }
 
     @Override

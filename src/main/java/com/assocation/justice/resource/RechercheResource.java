@@ -25,7 +25,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api/recherches")
+@RequestMapping("/api/v1/recherches")
 public class RechercheResource {
     private final RechercheService rechercheService;
 

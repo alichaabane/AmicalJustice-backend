@@ -1,10 +1,14 @@
 package com.assocation.justice.resource;
 
 import com.assocation.justice.dto.ActualiteDTO;
+import com.assocation.justice.dto.PageRequestData;
+import com.assocation.justice.dto.RegionResponsableDTO2;
 import com.assocation.justice.service.ActualiteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +18,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api/actualites")
+@RequestMapping("/api/v1/actualites")
 public class ActualitesResource {
     private final ActualiteService actualiteService;
 
@@ -41,27 +46,34 @@ public class ActualitesResource {
         List<ActualiteDTO> imageDTOs = actualiteService.getAllImages();
         return ResponseEntity.ok(imageDTOs);
     }
-
-    @GetMapping("/{filename:.+}")
-    public ResponseEntity<Resource> getImage(@PathVariable String filename) throws IOException {
-        Resource resource = new ClassPathResource("static/uploads/" + filename);
-        String mediaTypeString = determineMediaType(filename);
-
-        return ResponseEntity.ok()
-                .contentLength(resource.contentLength())
-                .contentType(MediaType.parseMediaType(mediaTypeString) ) // Adjust content type based on your image type
-                .body(resource);
-    }
-
-    private String determineMediaType(String filename) {
-        if (filename.toLowerCase().endsWith(".webp")) {
-            return "image/webp";
+    @GetMapping("/paginated")
+    public ResponseEntity<PageRequestData<ActualiteDTO>> getAllImagesPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        PageRequestData<ActualiteDTO> actualiteDTOPageRequestData = actualiteService.getAllImagesPaginated(pageRequest);
+        if(actualiteDTOPageRequestData != null){
+            return new ResponseEntity<>(actualiteDTOPageRequestData, HttpStatus.OK);
         } else {
-            // Default to JPEG if the format is not recognized
-            return "image/jpeg";
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
 
+    //TODO
+    @GetMapping("/{filename:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) throws IOException {
+        Resource resource = new ClassPathResource("static/uploads/" + filename);
+
+        if (!resource.exists()) {
+            // Handle the case where the resource (image) is not found
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG) // Set a default media type to handle images
+                .body(resource);
+    }
 
     @PostMapping("/upload")
     public ActualiteDTO uploadImage(@RequestParam("file") MultipartFile file,
@@ -79,11 +91,8 @@ public class ActualitesResource {
     @PutMapping("/active/{id}")
     public ResponseEntity<ActualiteDTO> toggleVisibleState(@PathVariable Long id) {
         ResponseEntity<ActualiteDTO> responseEntity = actualiteService.changeImageVisibleState(id);
-        if (responseEntity != null) {
-            return responseEntity; // Return the response from changeImageVisibleState
-        } else {
-            return ResponseEntity.notFound().build(); // Return a 404 response if changeImageVisibleState returns null
-        }
+        // Return a 404 response if changeImageVisibleState returns null
+        return Objects.requireNonNullElseGet(responseEntity, () -> ResponseEntity.notFound().build()); // Return the response from changeImageVisibleState
     }
 
 

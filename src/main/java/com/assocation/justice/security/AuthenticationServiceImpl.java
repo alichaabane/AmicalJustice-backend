@@ -1,24 +1,35 @@
 package com.assocation.justice.security;
 
-import com.assocation.justice.dto.JwtAuthenticationResponse;
-import com.assocation.justice.dto.SignUpRequest;
-import com.assocation.justice.dto.SigninRequest;
-import com.assocation.justice.dto.UserDTO;
+import com.assocation.justice.dto.*;
+import com.assocation.justice.entity.RegionResponsable;
 import com.assocation.justice.entity.User;
 import com.assocation.justice.repository.UserRepository;
 import com.assocation.justice.util.enumeration.Role;
+import com.assocation.justice.util.enumeration.Source;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.social.facebook.api.Facebook;
+import org.springframework.social.facebook.api.impl.FacebookTemplate;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,6 +43,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
+    @Value("${spring.security.oauth2.resourceserver.jwt.client-id}")
+    private String clientGoogleId;
     @Override
     public ResponseEntity<?> signup(SignUpRequest request) {
         // Check if the user already exists
@@ -73,6 +86,64 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
     }
 
+
+    @Override
+    public ResponseEntity<?> signinWithGoogle(SigninProviderRequest request) {
+        System.out.println("request GOOGLE login = "+ request);
+        GoogleIdToken.Payload payload = this.getGoogleData(request.getToken());
+        User user = this.userRepository.findUserByEmail(payload.getEmail()).orElse(null);
+        if(user != null) {
+            user.setSource(Source.GOOGLE);
+            var userDTO = mapUserToUserDto(user);
+            var jwt = jwtService.generateToken(user);
+            return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @Override
+    public ResponseEntity<?> signinWithFacebook(SigninProviderRequest request) {
+        System.out.println("request facebook login = "+ request);
+        org.springframework.social.facebook.api.User user = this.getFacebookData(request.getToken());
+        User userJustice = this.userRepository.findUserByEmail(user.getEmail()).orElse(null);
+        if(userJustice != null) {
+            userJustice.setSource(Source.FACEBOOK);
+            var userDTO = mapUserToUserDto(userJustice);
+            var jwt = jwtService.generateToken(userJustice);
+            return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    public GoogleIdToken.Payload getGoogleData(String idToken) {
+        NetHttpTransport transport = new NetHttpTransport();
+        JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                .setAudience(Collections.singletonList(clientGoogleId))
+                .build();
+
+        GoogleIdToken googleIdToken = null;
+        try {
+            googleIdToken = verifier.verify(idToken);
+            if (googleIdToken != null) {
+                System.out.println(googleIdToken.getPayload());
+                return googleIdToken.getPayload();
+            }
+        } catch (GeneralSecurityException | IOException e) {
+            e.printStackTrace(); // Logging the exception for debugging purposes
+            // Handle the exception according to your application's requirements
+        } finally {
+            return googleIdToken.getPayload();
+        }
+    }
+
+    public org.springframework.social.facebook.api.User getFacebookData(String token) {
+        Facebook facebook = new FacebookTemplate(token);
+        final String[] fields = { "email", "name", "first_name", "last_name"};
+        return facebook.fetchObject("me", org.springframework.social.facebook.api.User.class, fields);
+    }
+
     @Override
     public List<UserDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
@@ -80,8 +151,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    public PageRequestData<UserDTO> getAllUsersPaginated(PageRequest pageRequest) {
+        Page<User> userPage = userRepository.findAll(pageRequest);
+        PageRequestData<UserDTO> customPageResponse = new PageRequestData<>();
+        customPageResponse.setContent(userPage.map(this::mapUserToUserDto).getContent());
+        customPageResponse.setTotalPages(userPage.getTotalPages());
+        customPageResponse.setTotalElements(userPage.getTotalElements());
+        customPageResponse.setNumber(userPage.getNumber());
+        customPageResponse.setSize(userPage.getSize());
+        logger.info("Fetching All users of Page N° " + pageRequest.getPageNumber());
+        return customPageResponse;    }
+
+    @Override
     public UserDTO getUserById(Long id) {
         Optional<User> user = this.userRepository.findById(id);
+        return user.map(this::mapUserToUserDto).orElse(null);
+    }
+    @Override
+    public UserDTO getUserByEmail(String email) {
+        Optional<User> user = this.userRepository.findUserByEmail(email);
         return user.map(this::mapUserToUserDto).orElse(null);
     }
 
@@ -102,6 +190,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(user != null) {
             user.setLastName(signUpRequest.getLastName());
             user.setFirstName(signUpRequest.getFirstName());
+            if(signUpRequest.getEmail() != null) {
+                user.setEmail(signUpRequest.getEmail());
+            }
+            if(!signUpRequest.getSource().equals(Source.LOGIN)) {
+                user.setSource(signUpRequest.getSource());
+            } else {
+                user.setSource(Source.LOGIN);
+            }
             if(signUpRequest.getPassword() != null) {
                 user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
             }
@@ -121,8 +217,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public UserDTO getCurrentUser(Authentication authentication) {
-        if (authentication != null && authentication.getPrincipal() instanceof User) {
-            User user = (User) authentication.getPrincipal();
+        if (authentication != null && authentication.getPrincipal() instanceof User user) {
             return mapUserToUserDto(user);
         }
         return  null;
@@ -137,9 +232,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(user.getUsername()!= null) {
             userDTO.setUsername(user.getUsername());
         }
+        if(user.getEmail()!= null) {
+            userDTO.setEmail(user.getEmail());
+        }
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
         userDTO.setLastName(user.getLastName());
+        if(!user.getSource().equals(Source.LOGIN)) {
+            userDTO.setSource(user.getSource());
+        } else {
+            userDTO.setSource(Source.LOGIN);
+        }
         userDTO.setRegionResponsableId(user.getRegionResponsableId());
         userDTO.setLastName(user.getLastName());
         userDTO.setPassword(passwordEncoder.encode(user.getPassword()));

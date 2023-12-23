@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api/magazines")
+@RequestMapping("/api/v1/magazines")
 public class MagazineResource {
     private final MagazineService magazineService;
 

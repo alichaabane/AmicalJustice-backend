@@ -1,7 +1,10 @@
 package com.assocation.justice.service.impl;
 
 import com.assocation.justice.dto.ActualiteDTO;
+import com.assocation.justice.dto.PageRequestData;
+import com.assocation.justice.dto.RegionResponsableDTO2;
 import com.assocation.justice.entity.Actualite;
+import com.assocation.justice.entity.RegionResponsable;
 import com.assocation.justice.repository.ActualiteRepository;
 import com.assocation.justice.service.ActualiteService;
 import jakarta.persistence.EntityNotFoundException;
@@ -9,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,6 +95,19 @@ public class ActualiteServiceImpl implements ActualiteService {
                 .collect(Collectors.toList());
         logger.info("Actualite list fetched successfully");
         return imageDTOs;
+    }
+
+    @Override
+    public PageRequestData<ActualiteDTO> getAllImagesPaginated(PageRequest pageRequest) {
+        Page<Actualite> actualitePage = actualiteRepository.findAll(pageRequest);
+        PageRequestData<ActualiteDTO> customPageResponse = new PageRequestData<>();
+        customPageResponse.setContent(actualitePage.map(this::mapActualiteToDTO).getContent());
+        customPageResponse.setTotalPages(actualitePage.getTotalPages());
+        customPageResponse.setTotalElements(actualitePage.getTotalElements());
+        customPageResponse.setNumber(actualitePage.getNumber());
+        customPageResponse.setSize(actualitePage.getSize());
+        logger.info("Fetching All actualities of Page N° " + pageRequest.getPageNumber());
+        return customPageResponse;
     }
 
     @Override

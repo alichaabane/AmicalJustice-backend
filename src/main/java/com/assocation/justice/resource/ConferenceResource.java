@@ -25,7 +25,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api/conferences")
+@RequestMapping("/api/v1/conferences")
 public class ConferenceResource {
     private final ConferenceService conferenceService;
 
@@ -60,12 +60,18 @@ public class ConferenceResource {
     }
 
     @GetMapping("")
-    public ResponseEntity<PageRequestData<ConferenceDTO>> getAllConferences(
+    public ResponseEntity<List<ConferenceDTO>> getAllConferences() {
+        List<ConferenceDTO> imageDTOs = conferenceService.getAllConferences();
+        return ResponseEntity.ok(imageDTOs);
+    }
+
+    @GetMapping("/paginated")
+    public ResponseEntity<PageRequestData<ConferenceDTO>> getAllConferencesPaginated(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        PageRequestData<ConferenceDTO> conferencePage = conferenceService.getAllConferences(pageRequest);
+        PageRequestData<ConferenceDTO> conferencePage = conferenceService.getAllConferencesPaginated(pageRequest);
         return ResponseEntity.ok(conferencePage);
     }
 
