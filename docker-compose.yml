@@ -19,18 +19,6 @@ services:
     networks:
       - internalnet
 
-  justice-backoffice:
-    container_name: justice-backoffice
-    build:
-      context: .
-    image: justice-backoffice:v1
-    ports:
-      - "4999:4999"
-    expose:
-      - 4999
-    networks:
-      - internalnet
-
 networks:
   internalnet:
     name: justice-network
