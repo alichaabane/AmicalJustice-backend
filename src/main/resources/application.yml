@@ -31,10 +31,10 @@ spring:
 
   ############# Database Config #########
   datasource:
-    url: jdbc:postgresql://192.168.1.106:5432/justice
+    url: jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT}/${POSTGRESQL_DATABASE}
     driverClassName: org.postgresql.Driver
-    username: postgres
-    password: justice#123
+    username: ${POSTGRESQL_USERNAME}
+    password: ${POSTGRESQL_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -47,7 +47,7 @@ spring:
 #    #GRANT ALL PRIVILEGES ON *.* TO 'root'@'host.docker.internal' WITH GRANT OPTION;
 #    #FLUSH PRIVILEGES;
 #    driverClassName: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
+#    url: jdbc:mysql://${POSTGRESQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
 #    username: ${MYSQL_USERNAME}
 #    password: ${MYSQL_PASSWORD}
 #  jpa:
