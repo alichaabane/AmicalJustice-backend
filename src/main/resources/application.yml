@@ -31,20 +31,32 @@ spring:
 
   ############# Database Config #########
   datasource:
-    # CREATE USER 'root'@'host.docker.internal' IDENTIFIED BY '';
-    #GRANT ALL PRIVILEGES ON *.* TO 'root'@'host.docker.internal' WITH GRANT OPTION;
-    #FLUSH PRIVILEGES;
-    driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
+    url: jdbc:postgresql://192.168.1.106:5432/justice
+    driverClassName: org.postgresql.Driver
+    username: postgres
+    password: justice#123
   jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+    hibernate:
       ddl-auto: update
-      generate-ddl: true
-      show-sql: true
+      format_sql: true
+      id:
+        new_generator_mappings: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    #  datasource:
+#    # CREATE USER 'root'@'host.docker.internal' IDENTIFIED BY '';
+#    #GRANT ALL PRIVILEGES ON *.* TO 'root'@'host.docker.internal' WITH GRANT OPTION;
+#    #FLUSH PRIVILEGES;
+#    driverClassName: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
+#    username: ${MYSQL_USERNAME}
+#    password: ${MYSQL_PASSWORD}
+#  jpa:
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.MySQLDialect
+#      ddl-auto: update
+#      generate-ddl: true
+#      show-sql: true
   server:
     error:
       include-message: always
@@ -52,17 +64,17 @@ spring:
 ############# Uploads directories #########
 app:
   upload:
-    dir: src/main/resources/static/uploads
+    dir: justice-backend/src/main/resources/static/uploads
   conference:
-    dir: src/main/resources/static/conferences
+    dir: justice-backend/src/main/resources/static/conferences
   recherche:
-    dir: src/main/resources/static/recherches
+    dir: justice-backend/src/main/resources/static/recherches
   magazine:
-    dir: src/main/resources/static/magazines
+    dir: justice-backend/src/main/resources/static/magazines
 
 web:
     resources:
-      static-locations: classpath:/static/,classpath:/uploads/,classpath:/conferences/,classpath:/recherches/,classpath:/magazines/
+      static-locations: classpath:justice-backend/static/,classpath:justice-backend/uploads/,classpath:justice-backend/conferences/,classpath:justice-backend/recherches/,classpath:justice-backend/magazines/
     servlet:
       multipart:
         max-file-size: 10MB

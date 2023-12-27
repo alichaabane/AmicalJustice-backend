@@ -100,7 +100,7 @@ public class ConferenceResource {
 
     @GetMapping("/{filename:.+}")
     public ResponseEntity<?> getConference(@PathVariable String filename) throws MalformedURLException {
-        Path filePath = Paths.get("src", "main", "resources", "static", "conferences", filename);
+        Path filePath = Paths.get("justice-backend", "src", "main", "resources", "static", "conferences", filename);
         UrlResource resource = new UrlResource(filePath.toUri());
 
         return ResponseEntity.ok()

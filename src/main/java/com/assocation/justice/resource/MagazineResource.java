@@ -88,7 +88,7 @@ public class MagazineResource {
 
     @GetMapping("/{filename:.+}")
     public ResponseEntity<?> getMagazine(@PathVariable String filename) throws MalformedURLException {
-        Path filePath = Paths.get("src", "main", "resources", "static", "magazines", filename);
+        Path filePath = Paths.get("justice-backend", "src", "main", "resources", "static", "magazines", filename );
         UrlResource resource = new UrlResource(filePath.toUri());
 
         return ResponseEntity.ok()
@@ -99,7 +99,7 @@ public class MagazineResource {
 
     @GetMapping("/video/{filename:.+}")
     public ResponseEntity<?> getVideo(@PathVariable String filename) throws MalformedURLException {
-        Path filePath = Paths.get("src", "main", "resources", "static", "videos", filename + ".mp4");
+        Path filePath = Paths.get("justice-backend","src", "main", "resources", "static", "videos", filename + ".mp4");
         UrlResource resource = new UrlResource(filePath.toUri());
 
         // Set the content type for MP4 video

@@ -36,28 +36,28 @@ public class AppInitializer implements CommandLineRunner {
 
         RegionResponsableDTO2 regionResponsableDTO2 = null;
         if (regionResponsableService.getAllRegionResponsables().isEmpty()) {
-        logger.info("No Region Responsable found. creating some region responsables");
-        regionResponsableDTO2 = new RegionResponsableDTO2(null, "قفصة", "34.4208066" , "8.7731791", Region.قفصة, "76200400");
-        logger.info("Region Responsable initialized and created successfully");
+            logger.info("No Region Responsable found. creating some region responsables");
+            regionResponsableDTO2 = new RegionResponsableDTO2(null, "قفصة", "34.4208066", "8.7731791", Region.قفصة, "76200400");
+            logger.info("Region Responsable initialized and created successfully");
         }
 
         if (authenticationService.getAllUsers().isEmpty()) {
             logger.info("No User found. creating some users");
             List<RegionResponsableDTO> regionResponsableDTOList = regionResponsableService.getAllRegionResponsableByRegion("قفصة");
-            SignUpRequest user = new SignUpRequest(null,"رمزي", "بالسعدي",
+            SignUpRequest user = new SignUpRequest(null, "رمزي", "بالسعدي",
                     "ramzibessadi2023", "ramzibessadi@yahoo.com", "ramzi2023_",
-                    regionResponsableDTOList.get(0).getId() != null  ? regionResponsableDTOList.get(0).getId() : null, true, Role.SUPER_ADMIN
-            , Source.LOGIN);
+                    !regionResponsableDTOList.isEmpty() ? regionResponsableDTOList.get(0).getId() : null, true, Role.SUPER_ADMIN
+                    , Source.LOGIN);
             authenticationService.signup(user);
             logger.info("User initialized and created successfully");
         }
 
         if (responsableService.getAllResponsables().isEmpty()) {
-        logger.info("No Responsable found. creating some responsables");
-        ResponsableDTO responsableDTO = new ResponsableDTO(null, "رمزي بالسعدي" , "98531554","ramzibessadi@yahoo.com",
-        "محكمة الإبتدائية بقفصة",CategoryResponsable.رئيس_فرع,  Region.قفصة, regionResponsableDTO2.getNom());
-        responsableService.createResponsable(responsableDTO);
-        logger.info("Responsable initialized and created successfully");
-    }
+            logger.info("No Responsable found. creating some responsables");
+            ResponsableDTO responsableDTO = new ResponsableDTO(null, "رمزي بالسعدي", "98531554", "ramzibessadi@yahoo.com",
+                    "محكمة الإبتدائية بقفصة", CategoryResponsable.رئيس_فرع, Region.قفصة, regionResponsableDTO2.getNom());
+            responsableService.createResponsable(responsableDTO);
+            logger.info("Responsable initialized and created successfully");
+        }
     }
 }

@@ -238,11 +238,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
         userDTO.setLastName(user.getLastName());
-        if(!user.getSource().equals(Source.LOGIN)) {
-            userDTO.setSource(user.getSource());
-        } else {
-            userDTO.setSource(Source.LOGIN);
-        }
+//        if(!user.getSource().equals(Source.LOGIN)) {
+//            userDTO.setSource(user.getSource());
+//        } else {
+//            userDTO.setSource(Source.LOGIN);
+//        }
+        userDTO.setSource(user.getSource());
+
         userDTO.setRegionResponsableId(user.getRegionResponsableId());
         userDTO.setLastName(user.getLastName());
         userDTO.setPassword(passwordEncoder.encode(user.getPassword()));

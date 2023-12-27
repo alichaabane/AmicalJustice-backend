@@ -94,7 +94,7 @@ public class RechercheResource {
 
     @GetMapping("/{filename:.+}")
     public ResponseEntity<?> getRecherche(@PathVariable String filename) throws MalformedURLException {
-        Path filePath = Paths.get("src", "main", "resources", "static", "recherches", filename);
+        Path filePath = Paths.get("justice-backend", "src", "main", "resources", "static", "recherches", filename);
         UrlResource resource = new UrlResource(filePath.toUri());
 
         return ResponseEntity.ok()
