@@ -25,7 +25,7 @@ import java.util.List;
 @AllArgsConstructor
 public class AppInitializer implements CommandLineRunner {
 
-    private final Logger logger = LoggerFactory.getLogger(ActualiteServiceImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(AppInitializer.class);
 
     private final ResponsableService responsableService;
     private final RegionResponsableService regionResponsableService;
