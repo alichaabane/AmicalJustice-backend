@@ -15,7 +15,7 @@ services:
     expose:
       - ${CONTAINER_PORT}
     volumes:
-      - ./src/main/resources/static:/app/src/main/resources/static
+      - ./justice-backend/src/main/resources/static:/justice-backend/src/main/resources/static
     networks:
       - internalnet
 
