@@ -6,7 +6,7 @@ services:
       context: .
       args:
         CONTAINER_PORT: ${CONTAINER_PORT}
-    image: justice-backend:v1
+    image: ${IMAGE_HOST}/justice-backend:${IMAGE_TAG}  # Use the image from your local registry
     restart: unless-stopped
     env_file:
       - ${ENV_FILE}
@@ -15,7 +15,7 @@ services:
     expose:
       - ${CONTAINER_PORT}
     volumes:
-      - ./justice-backend/src/main/resources/static:/justice-backend/src/main/resources/static
+      - ./src/main/resources/static:/justice-backend/src/main/resources/static
     networks:
       - internalnet
 
