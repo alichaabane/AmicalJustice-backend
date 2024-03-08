@@ -55,7 +55,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         var user = User.builder().firstName(request.getFirstName()).lastName(request.getLastName())
-                .username(request.getUsername()).password(passwordEncoder.encode(request.getPassword()))
+                .confirmed(request.isConfirmed())
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .regionResponsableId(request.getRegionResponsableId())
                 .role(request.getRole() != null ? request.getRole() : Role.ADMIN).build();
         userRepository.save(user);

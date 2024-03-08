@@ -1,5 +1,5 @@
 # Database
-POSTGRESQL_HOST: host.docker.internal
+POSTGRESQL_HOST: localhost
 POSTGRESQL_PORT: 5432
 POSTGRESQL_DATABASE: justice
 POSTGRESQL_USERNAME: postgres
