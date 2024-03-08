@@ -14,6 +14,10 @@ token:
 spring:
   profiles:
     active: ${ACTIVE_PROFILE:dev}
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
 
 ############# Google Oauth2 Config #########
   security:
@@ -37,7 +41,7 @@ spring:
     password: ${POSTGRESQL_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
       format_sql: true
       id:
         new_generator_mappings: true
@@ -75,7 +79,3 @@ app:
 web:
     resources:
       static-locations: classpath:justice-backend/static/,classpath:justice-backend/uploads/,classpath:justice-backend/conferences/,classpath:justice-backend/recherches/,classpath:justice-backend/magazines/
-    servlet:
-      multipart:
-        max-file-size: 10MB
-        max-request-size: 10MB
