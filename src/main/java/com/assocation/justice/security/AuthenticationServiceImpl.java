@@ -57,6 +57,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var user = User.builder().firstName(request.getFirstName()).lastName(request.getLastName())
                 .confirmed(request.isConfirmed())
                 .username(request.getUsername())
+                .source(request.getSource() != null ? request.getSource() : Source.LOGIN)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .regionResponsableId(request.getRegionResponsableId())
                 .role(request.getRole() != null ? request.getRole() : Role.ADMIN).build();
@@ -195,7 +196,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             if(signUpRequest.getEmail() != null) {
                 user.setEmail(signUpRequest.getEmail());
             }
-            if(!signUpRequest.getSource().equals(Source.LOGIN)) {
+            if(signUpRequest.getSource() != null && !signUpRequest.getSource().equals(Source.LOGIN)) {
                 user.setSource(signUpRequest.getSource());
             } else {
                 user.setSource(Source.LOGIN);
