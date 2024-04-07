@@ -19,7 +19,16 @@ spring:
       max-file-size: 20MB
       max-request-size: 20MB
 
-############# Google Oauth2 Config #########
+  ############# Redis Caching Config #########
+  cache:
+    type: redis
+    cache-names:
+      - justiceCache
+    redis:
+      time-to-live: 60000
+      cache-null-values: true
+
+  ############# Google Oauth2 Config #########
   security:
     oauth2:
       resource:

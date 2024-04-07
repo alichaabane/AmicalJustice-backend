@@ -9,13 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthenticationResource {
+public class AuthenticationResource implements Serializable {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signup")
@@ -25,7 +26,13 @@ public class AuthenticationResource {
 
     @PostMapping("/signin")
     public ResponseEntity<?> signin(@RequestBody SigninRequest request) {
-        return authenticationService.signin(request);
+        SigninResponse response = authenticationService.signin(request);
+
+        if (response.getStatus() == HttpStatus.OK) {
+            return ResponseEntity.ok(response.getJwtResponse());
+        } else {
+            return ResponseEntity.status(response.getStatus()).body(response.getMessage());
+        }
     }
 
     @PutMapping("/active/{username}")

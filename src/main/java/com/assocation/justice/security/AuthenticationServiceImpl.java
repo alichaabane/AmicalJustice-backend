@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -22,12 +23,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.impl.FacebookTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +39,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationServiceImpl implements AuthenticationService {
+public class AuthenticationServiceImpl implements AuthenticationService, Serializable {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -46,6 +49,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Value("${spring.security.oauth2.resourceserver.jwt.client-id}")
     private String clientGoogleId;
     @Override
+    @Cacheable(cacheNames = "justiceCache", key = "'signup:' + #request.getUsername()")
     public ResponseEntity<?> signup(SignUpRequest request) {
         // Check if the user already exists
         if (userRepository.findUserByUsername(request.getUsername()).isPresent()) {
@@ -69,28 +73,32 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public ResponseEntity<?> signin(SigninRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-        var user = userRepository.findUserByUsername(request.getUsername()).orElse(null);
+    @Cacheable(cacheNames = "justiceCache", key = "'signin:' + #request.getUsername()")
+    public SigninResponse signin(SigninRequest request) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+            var user = userRepository.findUserByUsername(request.getUsername()).orElse(null);
 
-        if(user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("USER NOT EXIST");
+            if (user == null) {
+                return new SigninResponse(HttpStatus.NOT_FOUND, "USER NOT EXIST", null);
+            }
+
+            if (!user.isConfirmed() && !user.getRole().equals(Role.SUPER_ADMIN)) {
+                return new SigninResponse(HttpStatus.FORBIDDEN, "USER NOT CONFIRMED", null);
+            }
+
+            var userDTO = mapUserToUserDto(user);
+            var jwt = jwtService.generateToken(user);
+            return new SigninResponse(HttpStatus.OK, "SUCCESS", JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
+        } catch (AuthenticationException e) {
+            return new SigninResponse(HttpStatus.UNAUTHORIZED, "INVALID CREDENTIALS", null);
         }
-
-        if (!user.isConfirmed() && !user.getRole().equals(Role.SUPER_ADMIN)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("USER NOT CONFIRMED");
-        }
-
-        var userDTO = mapUserToUserDto(user);
-        var jwt = jwtService.generateToken(user);
-        return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).user(userDTO).build());
     }
 
 
     @Override
+    @Cacheable(cacheNames = "justiceCache", key = "'signinWithGoogle:' + #request.getToken()")
     public ResponseEntity<?> signinWithGoogle(SigninProviderRequest request) {
         System.out.println("request GOOGLE login = "+ request);
         GoogleIdToken.Payload payload = this.getGoogleData(request.getToken());
@@ -105,6 +113,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Cacheable(cacheNames = "justiceCache", key = "'signinWithFacebook:' + #request.getToken()")
     public ResponseEntity<?> signinWithFacebook(SigninProviderRequest request) {
         System.out.println("request facebook login = "+ request);
         org.springframework.social.facebook.api.User user = this.getFacebookData(request.getToken());
@@ -148,12 +157,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Cacheable(cacheNames = "justiceCache", key = "'allUsers'")
     public List<UserDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
         return users.stream().map(this::mapUserToUserDto).collect(Collectors.toList());
     }
 
     @Override
+    @Cacheable(cacheNames = "justiceCache",key = "#pageRequest")
     public PageRequestData<UserDTO> getAllUsersPaginated(PageRequest pageRequest) {
         Page<User> userPage = userRepository.findAll(pageRequest);
         PageRequestData<UserDTO> customPageResponse = new PageRequestData<>();
@@ -163,20 +174,24 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         customPageResponse.setNumber(userPage.getNumber());
         customPageResponse.setSize(userPage.getSize());
         logger.info("Fetching All users of Page N° " + pageRequest.getPageNumber());
-        return customPageResponse;    }
+        return customPageResponse;
+    }
 
     @Override
+    @Cacheable(cacheNames = "justiceCache",key = "#id")
     public UserDTO getUserById(Long id) {
         Optional<User> user = this.userRepository.findById(id);
         return user.map(this::mapUserToUserDto).orElse(null);
     }
     @Override
+    @Cacheable(cacheNames = "justiceCache",key = "#email")
     public UserDTO getUserByEmail(String email) {
         Optional<User> user = this.userRepository.findUserByEmail(email);
         return user.map(this::mapUserToUserDto).orElse(null);
     }
 
     @Override
+    @Cacheable(cacheNames = "justiceCache",key = "#username")
     public ResponseEntity<UserDTO> changeUserState(String username) {
         User user = userRepository.findUserByUsername(username).orElseThrow(IllegalArgumentException::new);
         user.setConfirmed(!user.isConfirmed());
@@ -188,6 +203,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Cacheable(cacheNames = "justiceCache",key = "#signUpRequest.getId()")
     public ResponseEntity<?> updateUser(SignUpRequest signUpRequest) {
         User user = userRepository.findById(signUpRequest.getId()).orElse(null);
         if(user != null) {
@@ -214,11 +230,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
+    @Cacheable(cacheNames = "justiceCache",key = "#id")
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
     @Override
+    @Cacheable(cacheNames = "justiceCache",key = "#authentication.getPrincipal()")
     public UserDTO getCurrentUser(Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof User user) {
             return mapUserToUserDto(user);

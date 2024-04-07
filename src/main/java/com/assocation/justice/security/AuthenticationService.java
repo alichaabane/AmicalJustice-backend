@@ -10,7 +10,7 @@ import java.util.List;
 public interface AuthenticationService {
     ResponseEntity<?> signup(SignUpRequest request);
 
-    ResponseEntity<?> signin(SigninRequest request);
+    SigninResponse signin(SigninRequest request);
     ResponseEntity<?> signinWithGoogle(SigninProviderRequest request);
     ResponseEntity<?> signinWithFacebook(SigninProviderRequest request);
 

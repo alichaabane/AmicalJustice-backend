@@ -9,11 +9,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
+public class UserDTO implements Serializable {
         private Long id;
         private String firstName;
         private String lastName;
